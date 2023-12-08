@@ -33,6 +33,11 @@ long_description = long_description.replace(
     "](" + url + "/blob/v" + version + "/docs/"
 )
 
+long_description = long_description.replace(
+    "![](images/",
+    "](https://raw.githubusercontent.com/jbokser/rideology2gpx/main/images/"
+)
+
 requirements = []
 requires_files = ["/requirements.txt",
                   "/" + name + ".egg-info/requires.txt"]
