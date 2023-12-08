@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpx creator="rideolgy2gpx" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <metadata>
+  <name>From gas station to next gas station (gear shifts)</name>
+  <desc>From gas station to next gas station (gear shifts)</desc>
+ </metadata>
+ <trk>
+  <name>From gas station to next gas station (gear shifts)</name>
+  <desc>From gas station to next gas station (gear shifts)</desc>
+  <trkseg>
+  </trkseg>
+ </trk>
+ <wpt lat="-34.508213" lon="-58.479717">
+  <name>Low to 1 gear</name>
+  <desc>4km/h @ 1067rpm</desc>
+ </wpt>
+ <wpt lat="-34.508465" lon="-58.47945">
+  <name>Up to 2 gear</name>
+  <desc>25km/h @ 2142rpm</desc>
+ </wpt>
+ <wpt lat="-34.507996" lon="-58.47955">
+  <name>Up to 3 gear</name>
+  <desc>44km/h @ 3417rpm</desc>
+ </wpt>
+ <wpt lat="-34.50696" lon="-58.47997">
+  <name>Up to 4 gear</name>
+  <desc>60km/h @ 3846rpm</desc>
+ </wpt>
+ <wpt lat="-34.505974" lon="-58.48034">
+  <name>Low to 2 gear</name>
+  <desc>25km/h @ 1303rpm</desc>
+ </wpt>
+ <wpt lat="-34.50584" lon="-58.480385">
+  <name>Low to 1 gear</name>
+  <desc>14km/h @ 1376rpm</desc>
+ </wpt>
+ <wpt lat="-34.505707" lon="-58.48047">
+  <name>Up to 2 gear</name>
+  <desc>32km/h @ 3103rpm</desc>
+ </wpt>
+ <wpt lat="-34.50549" lon="-58.48053">
+  <name>Up to 3 gear</name>
+  <desc>45km/h @ 3017rpm</desc>
+ </wpt>
+ <wpt lat="-34.501698" lon="-58.48201">
+  <name>Up to 4 gear</name>
+  <desc>50km/h @ 2858rpm</desc>
+ </wpt>
+ <wpt lat="-34.5" lon="-58.4831">
+  <name>Low to 3 gear</name>
+  <desc>40km/h @ 2588rpm</desc>
+ </wpt>
+ <wpt lat="-34.499798" lon="-58.48324">
+  <name>Low to 2 gear</name>
+  <desc>32km/h @ 2548rpm</desc>
+ </wpt>
+ <wpt lat="-34.498627" lon="-58.48375">
+  <name>Low to 1 gear</name>
+  <desc>11km/h @ 1184rpm</desc>
+ </wpt>
+</gpx>
+

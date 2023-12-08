@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpx creator="rideolgy2gpx" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <metadata>
+  <name>From gas station to next gas station (speed shifts)</name>
+  <desc>From gas station to next gas station (speed shifts)</desc>
+ </metadata>
+ <trk>
+  <name>From gas station to next gas station (speed shifts)</name>
+  <desc>From gas station to next gas station (speed shifts)</desc>
+  <trkseg>
+  </trkseg>
+ </trk>
+ <wpt lat="-34.50696" lon="-58.47997">
+  <name>60 km/h</name>
+  <desc>3846 rpm @ 4 gear</desc>
+ </wpt>
+</gpx>
+
