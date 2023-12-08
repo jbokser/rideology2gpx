@@ -35,7 +35,7 @@ long_description = long_description.replace(
 
 long_description = long_description.replace(
     "![](images/",
-    "](https://raw.githubusercontent.com/jbokser/rideology2gpx/main/images/"
+    "![](https://raw.githubusercontent.com/jbokser/rideology2gpx/main/images/"
 )
 
 requirements = []
