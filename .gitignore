@@ -5,8 +5,14 @@ __pycache__
 
 # Package stuff
 build/
+rideology2gpx.egg-info/
 dist/
 
 # Virtual env stuff
 venv/
 .venv/
+
+# Some test files
+/*_report.txt
+/*.gpx
+/*.csv
