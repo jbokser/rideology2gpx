@@ -415,13 +415,21 @@ Max for each gear
             if not silent:
                 print(" Ok")
 
+        max_for_each_gear_str = tabulate(
+            self.max_for_each_gear,
+            headers={'gear':'Gear', 'kmh':'km/h'},
+            tablefmt='github',
+        ).replace('---|', '-: |'
+        ).replace('|---', '| --'
+        ).replace('|\n| --', '|\n| :-')
+
         md = f"""# {' '.join(self.title.split())}
 
 {self._table_report(tablefmt="github")}
 
 ## Max for each gear
 
-{tabulate(self.max_for_each_gear, headers={'gear':'Gear', 'kmh':'km/h'}, tablefmt='github')}
+{max_for_each_gear_str}
 
 ## Graphics
 
