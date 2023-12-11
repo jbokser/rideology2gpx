@@ -20,7 +20,8 @@ def main(
         max_speed = None,
         ending_chop = 0,
         starting_chop = 0,
-        subtitle = ''
+        subtitle = '',
+        do_graph = False
         ):
 
     datafile = DataFile(filename)
@@ -52,4 +53,10 @@ def main(
     if subtitle:
         datafile.title = f"{datafile.title}, {subtitle}"
 
-    datafile.dump(show_report=not(silent), silent=silent, start_time=start_time)
+    datafile.dump(silent=silent, start_time=start_time)
+    
+    if do_graph:
+        datafile.dump_md(silent=silent, start_time=start_time)
+    
+    if not silent:
+        print(datafile.report)

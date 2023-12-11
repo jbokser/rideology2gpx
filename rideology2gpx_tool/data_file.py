@@ -1,8 +1,10 @@
+import plotly.express as px
 from pathlib import Path
 from datetime import timedelta
 from datetime import datetime
 from tabulate import tabulate
 from collections import namedtuple
+from pandas import DataFrame, Series
 from .gpx_file import GpxFile
 
 
@@ -239,6 +241,33 @@ class DataFile():
         out.sort(key=lambda d: [d['gear'], d['kmh']])
         return out
 
+    def _table_report(self, tablefmt='plain'):
+
+        table = []
+
+        F = lambda x: x
+        if tablefmt=='plain':
+            F = lambda x: f"{x}:"
+        
+        kargs = {'tablefmt': tablefmt}
+        if tablefmt=='github':
+            kargs['headers'] = ['Item', 'Value']
+
+        table.append([F('Max engine speed'), f"{self.max_engine_rpm} rpm"])
+        table.append([F('Max wheel speed'), f"{self.max_wheel_speed} km/h"])
+        table.append([F('Max water temp'), f"{self.max_water_temperature} ℃"])
+
+        if self.avg_idle_speed:
+            table.append([F('Avg idle speed'), f"{self.avg_idle_speed} rpm"])
+
+        table.append([F('Avg speed'), f"{self.avg_speed} km/h"])
+        table.append([F('Total time'), f"{self._timedelta_str(self.elapsed_time)}"])
+        table.append([F('Distance'), f"{self.distance:.2f} km"])
+        table.append([F('Starting point'), str(self.start)])
+        table.append([F('Ending point'), str(self.end)])
+
+        return tabulate(table, **kargs)
+
     @property
     def distance(self):
         km = 0
@@ -258,15 +287,7 @@ class DataFile():
 {' '.join(self.title.split())}
 {' '.join([len(x)*'=' for x in self.title.split()])}
     
-Max engine speed: {self.max_engine_rpm} rpm
-Max wheel speed:  {self.max_wheel_speed} km/h
-Max water temp:   {self.max_water_temperature} ℃
-Avg idle speed:   {'Unknown' if self.avg_idle_speed is None else str(self.avg_idle_speed) + ' rpm'}
-Avg speed:        {self.avg_speed} km/h
-Total time:       {self._timedelta_str(self.elapsed_time)}
-Distance:         {self.distance:.2f} km
-Starting point:   {self.start}
-Ending point:     {self.end}
+{self._table_report()}
 
 Max for each gear
 --- --- ---- ----
@@ -322,13 +343,106 @@ Max for each gear
         
         return self
 
-
-    def dump(self, basenane=None, show_report=False, silent=True, start_time=None):
+    def data_frame(self, start_time=None):
 
         if start_time is None:
-            self._start_time = datetime.now()
-        else:
-            self._start_time = start_time
+            start_time = datetime.now()
+
+        columns = ['Time', 'Latitude', 'Longitude', 'Water temperature',
+                   'Engine RPM', 'Wheel speed', 'Gear position']
+        keys = {
+            'Time': 'elapsed_time',
+            'Latitude': 'gps_latitude',
+            'Longitude': 'gps_longitude',
+            'Water temperature': 'water_temperature',
+            'Engine RPM': 'engine_rpm',
+            'Wheel speed': 'wheel_speed',
+            'Gear position': 'gear_position'
+        }
+
+        transform = {
+            'elapsed_time': lambda x: x + start_time,
+            'gear_position': lambda x: (0 if x=='N' else int(x)),
+            'default': lambda x: x
+        }
+
+        df = DataFrame(columns=columns)
+        
+        for i, r in enumerate(self.table):
+            row = {}
+            for c in columns:
+                k = keys[c]
+                fnc = transform.get(k, transform.get('default', lambda x: x))
+                row[c] = fnc(r[k])
+            df.loc[i+1] = Series(row)
+    
+        return df
+
+    def dump_md(self, basenane=None, start_time=None, silent=True):
+
+        if basenane is None:
+            basename = self.filename.stem
+
+        for field, title in [
+                ("Wheel speed", "Wheel speed (km/h)"),
+                ("Engine RPM", "Engine (rpm)"),
+                ("Gear position", "Gear position (0=N)")
+            ]:
+
+            posname = "_".join([''] + field.strip().split()).lower()
+            
+            df = self.data_frame(start_time=start_time)
+            
+            fig = px.line(df, x='Time', y=field)
+            
+            base_kargs = dict(showgrid=True, gridwidth=1,
+                              gridcolor='LightPink',
+                minor=dict(ticklen=6, tickcolor="black", showgrid=True))
+            
+            fig.update_xaxes(title='Time (H:M:S)', tickformat="%H:%M:%S",
+                             tickangle=30, **base_kargs)
+            
+            fig.update_yaxes(title=title, **base_kargs)
+
+            image_filename = self.filename.with_name(
+                f"{basename}{posname}").with_suffix('.jpeg')
+
+            if not silent:
+                print(f"Make file {repr(str(image_filename))}...", end="")
+            
+            fig.write_image(image_filename, width=800, height=350)
+
+            if not silent:
+                print(" Ok")
+
+        md = f"""# {' '.join(self.title.split())}
+
+{self._table_report(tablefmt="github")}
+
+## Max for each gear
+
+{tabulate(self.max_for_each_gear, headers={'gear':'Gear', 'kmh':'km/h'}, tablefmt='github')}
+
+## Graphics
+
+ ![Wheel speed graph]({basename}_wheel_speed.jpeg)
+ ![Engine rpm graph]({basename}_engine_rpm.jpeg)
+ ![Gear position graph]({basename}_gear_position.jpeg)
+
+"""
+        report_filename = self.filename.with_name(
+            f"{basename}_report").with_suffix('.md')
+
+        if not silent:
+            print(f"Make file {repr(str(report_filename))}...", end="")
+
+        with open(report_filename, "w") as file:
+            print(md, file=file)
+
+        if not silent:
+            print(" Ok")
+
+    def dump(self, basenane=None, show_report=False, silent=True, start_time=None):
 
         if basenane is None:
             basename = self.filename.stem
@@ -361,10 +475,9 @@ Max for each gear
         if show_report:
             print(report_text)
 
+    def new_gpxfile(self, postitle="", start_time=None):
 
-    def new_gpxfile(self, postitle="", start_time = None):
-
-        gpxfile = GpxFile(start_time = start_time)
+        gpxfile = GpxFile(start_time=start_time)
         gpxfile.name = self.title + postitle
         gpxfile.desc = gpxfile.name
 
@@ -409,7 +522,7 @@ Max for each gear
         return gpxfile
 
 
-    def new_gpxfile_speed_shifts(self, chunk=1, postitle=" (speed shifts)", start_time = None):
+    def new_gpxfile_speed_shifts(self, chunk=1, postitle=" (speed shifts)", start_time=None):
         gpxfile = GpxFile(start_time=start_time)
         gpxfile.name = self.title + postitle
         gpxfile.desc = gpxfile.name

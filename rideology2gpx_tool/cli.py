@@ -51,8 +51,10 @@ The valid values ​​for FILTER are:
         metavar='FILTER',
         help='Filter applied to waypoints.')
 @argument('csv_file', type=TypePath(), required=False)
+@option('-g', '--graph', 'graph', is_flag=True,
+    help='Make graphs and md report.')
 @dinamic_help_decorator
-def cli(csv_file, start_time, show_version=False, data_filter=None):
+def cli(csv_file, start_time, show_version=False, data_filter=None, graph=None):
     """
     A simple command line program to transform log files obtained with the
     Kawasaki Rideology App into GPX files.
@@ -123,5 +125,6 @@ def cli(csv_file, start_time, show_version=False, data_filter=None):
         max_speed = max_speed,
         ending_chop = ending_chop,
         starting_chop = starting_chop,
-        subtitle = subtitle
+        subtitle = subtitle,
+        do_graph = graph
     )

@@ -14,5 +14,7 @@ venv/
 
 # Some test files
 /*_report.txt
+/*_report.md
 /*.gpx
 /*.csv
+/*.jpeg
