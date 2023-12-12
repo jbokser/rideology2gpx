@@ -4,7 +4,7 @@ from datetime import timedelta
 from datetime import datetime
 from tabulate import tabulate
 from collections import namedtuple
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, to_numeric
 from .gpx_file import GpxFile
 
 
@@ -375,7 +375,11 @@ Max for each gear
                 fnc = transform.get(k, transform.get('default', lambda x: x))
                 row[c] = fnc(r[k])
             df.loc[i+1] = Series(row)
-    
+
+        for field in ['Latitude', 'Longitude', 'Water temperature',
+                      'Engine RPM', 'Wheel speed', 'Gear position']:
+            df[field] = to_numeric(df[field])
+
         return df
 
     def dump_md(self, basenane=None, start_time=None, silent=True):
@@ -383,13 +387,14 @@ Max for each gear
         if basenane is None:
             basename = self.filename.stem
 
-        for field, title in [
-                ("Wheel speed", "Wheel speed (km/h)"),
-                ("Engine RPM", "Engine (rpm)"),
-                ("Gear position", "Gear position (0=N)")
+        for field, unit in [
+                ("Wheel speed", "km/h"),
+                ("Engine RPM", "rpm"),
+                ("Gear position", "0=N")
             ]:
 
             posname = "_".join([''] + field.strip().split()).lower()
+            title = f"{field} ({unit})"
             
             df = self.data_frame(start_time=start_time)
             
@@ -403,6 +408,16 @@ Max for each gear
                              tickangle=30, **base_kargs)
             
             fig.update_yaxes(title=title, **base_kargs)
+
+            if field in ["Wheel speed", "Engine RPM"]:
+                
+                max_y = df.loc[df[field].idxmax()][field]
+                max_x = df.loc[df[field].idxmax()]['Time']
+
+                fig.add_annotation(
+                    text=f"Max {max_y} {unit}", x=max_x, y=max_y,
+                    arrowhead=1, showarrow=True
+                )
 
             image_filename = self.filename.with_name(
                 f"{basename}{posname}").with_suffix('.jpeg')
