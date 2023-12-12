@@ -11,6 +11,8 @@ Make file 'ride_report.txt'... Ok
 Make file 'ride_wheel_speed.jpeg'... Ok
 Make file 'ride_engine_rpm.jpeg'... Ok
 Make file 'ride_gear_position.jpeg'... Ok
+Make file 'ride_table.jpeg'... Ok
+Make file 'ride_max_for_each_gear.jpeg'... Ok
 Make file 'ride_report.md'... Ok
 
 From gas station to next gas station
@@ -49,6 +51,8 @@ You get these `.jpeg` files:
 - `ride_wheel_speed.jpeg`
 - `ride_engine_rpm.jpeg`
 - `ride_gear_position.jpeg`
+- `ride_table.jpeg`
+- `ride_max_for_each_gear.jpeg`
 
 And reports:
 

@@ -1,4 +1,5 @@
 import plotly.express as px
+from plotly.graph_objects import Figure, Table
 from pathlib import Path
 from datetime import timedelta
 from datetime import datetime
@@ -241,17 +242,13 @@ class DataFile():
         out.sort(key=lambda d: [d['gear'], d['kmh']])
         return out
 
-    def _table_report(self, tablefmt='plain'):
+    def _table_report(self, tablefmt='github'):
 
         table = []
 
         F = lambda x: x
         if tablefmt=='plain':
             F = lambda x: f"{x}:"
-        
-        kargs = {'tablefmt': tablefmt}
-        if tablefmt=='github':
-            kargs['headers'] = ['Item', 'Value']
 
         table.append([F('Max engine speed'), f"{self.max_engine_rpm} rpm"])
         table.append([F('Max wheel speed'), f"{self.max_wheel_speed} km/h"])
@@ -265,6 +262,16 @@ class DataFile():
         table.append([F('Distance'), f"{self.distance:.2f} km"])
         table.append([F('Starting point'), str(self.start)])
         table.append([F('Ending point'), str(self.end)])
+
+        return table
+
+    def _table_report_str(self, tablefmt='plain'):
+
+        table = self._table_report(tablefmt=tablefmt)
+       
+        kargs = {'tablefmt': tablefmt}
+        if tablefmt=='github':
+            kargs['headers'] = ['Item', 'Value']
 
         return tabulate(table, **kargs)
 
@@ -287,7 +294,7 @@ class DataFile():
 {' '.join(self.title.split())}
 {' '.join([len(x)*'=' for x in self.title.split()])}
     
-{self._table_report()}
+{self._table_report_str()}
 
 Max for each gear
 --- --- ---- ----
@@ -390,24 +397,35 @@ Max for each gear
         for field, unit in [
                 ("Wheel speed", "km/h"),
                 ("Engine RPM", "rpm"),
-                ("Gear position", "0=N")
+                ("Gear position", "Gear")
             ]:
 
             posname = "_".join([''] + field.strip().split()).lower()
-            title = f"{field} ({unit})"
+            title = f"{field}, {' '.join(self.title.split())}"
             
             df = self.data_frame(start_time=start_time)
             
-            fig = px.line(df, x='Time', y=field)
+            fig = px.area(df, x='Time', y=field)
             
             base_kargs = dict(showgrid=True, gridwidth=1,
                               gridcolor='LightPink',
-                minor=dict(ticklen=6, tickcolor="black", showgrid=True))
+                minor=dict(ticklen=6 if field!="Gear position" else 0,
+                           tickcolor="black", showgrid=True))
             
             fig.update_xaxes(title=None, tickformat="%H:%M:%S",
                              tickangle=30, **base_kargs)
             
-            fig.update_yaxes(title=title, **base_kargs)
+            fig.update_yaxes(title=unit, **base_kargs)
+
+            if field=="Gear position":
+                fig.update_yaxes(tickvals=[0,1,2,3,4,5,6], ticktext=[
+                    ' N   ', 
+                    '1st  ',
+                    '2nd  ',
+                    '3rd  ',
+                    '4th  ',
+                    '5th  ',
+                    '6th  '])
 
             if field in ["Wheel speed", "Engine RPM"]:
                 
@@ -418,6 +436,8 @@ Max for each gear
                     text=f"Max {max_y} {unit}", x=max_x, y=max_y*1.01,
                     arrowhead=1, showarrow=True
                 )
+
+            fig.update_layout(title=title)
 
             image_filename = self.filename.with_name(
                 f"{basename}{posname}").with_suffix('.jpeg')
@@ -430,6 +450,69 @@ Max for each gear
             if not silent:
                 print(" Ok")
 
+        def get_values(table):
+            values = []
+            for i in range(len(table[0])):
+                values.append([x[i] for x in table])
+        
+            return values
+
+        table = self._table_report()
+        values = get_values(table)
+
+        fig = Figure(
+            data=[Table(
+                columnorder = [1, 2],
+                columnwidth = [45, 55],
+                cells = dict(values=values, align = 'left',
+                             line_color='darkslategray'),
+                header = dict(values=['Item', 'Value'], align = 'center',
+                              line_color='darkslategray')
+            )])
+        
+        title = f"Info, {' '.join(self.title.split())}"
+
+        fig.update_layout(title=title)
+
+        image_filename = self.filename.with_name(
+            f"{basename}_table").with_suffix('.jpeg')
+
+        if not silent:
+            print(f"Make file {repr(str(image_filename))}...", end="")
+        
+        fig.write_image(image_filename, width=500, height=450)
+
+        if not silent:
+            print(" Ok")
+
+        table = [[r[k] for k in ['gear', 'rpm', 'kmh']
+                  ] for r in self.max_for_each_gear]
+        values = get_values(table)
+
+        fig = Figure(
+            data=[Table(
+                cells = dict(values=values, align = 'right',
+                             line_color='darkslategray'),
+                header = dict(values=['Gear', 'rpm', 'km/h'],
+                              align = 'center',
+                              line_color='darkslategray')
+            )])
+        
+        title = f"Max for each gear, {' '.join(self.title.split())}"
+
+        fig.update_layout(title=title)
+
+        image_filename = self.filename.with_name(
+            f"{basename}_max_for_each_gear").with_suffix('.jpeg')
+
+        if not silent:
+            print(f"Make file {repr(str(image_filename))}...", end="")
+        
+        fig.write_image(image_filename, width=550, height=350)
+
+        if not silent:
+            print(" Ok")
+
         max_for_each_gear_str = tabulate(
             self.max_for_each_gear,
             headers={'gear':'Gear', 'kmh':'km/h'},
@@ -440,7 +523,7 @@ Max for each gear
 
         md = f"""# {' '.join(self.title.split())}
 
-{self._table_report(tablefmt="github")}
+{self._table_report_str(tablefmt="github")}
 
 ## Max for each gear
 
