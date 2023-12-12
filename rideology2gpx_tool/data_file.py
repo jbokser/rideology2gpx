@@ -404,7 +404,7 @@ Max for each gear
                               gridcolor='LightPink',
                 minor=dict(ticklen=6, tickcolor="black", showgrid=True))
             
-            fig.update_xaxes(title='Time (H:M:S)', tickformat="%H:%M:%S",
+            fig.update_xaxes(title=None, tickformat="%H:%M:%S",
                              tickangle=30, **base_kargs)
             
             fig.update_yaxes(title=title, **base_kargs)
@@ -415,7 +415,7 @@ Max for each gear
                 max_x = df.loc[df[field].idxmax()]['Time']
 
                 fig.add_annotation(
-                    text=f"Max {max_y} {unit}", x=max_x, y=max_y,
+                    text=f"Max {max_y} {unit}", x=max_x, y=max_y*1.01,
                     arrowhead=1, showarrow=True
                 )
 
