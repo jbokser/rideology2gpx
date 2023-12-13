@@ -63,7 +63,7 @@ Usage: rideology2gpx [OPTIONS] [CSV_FILE] [OUTPUT_DIR]
 
   For more info: https://github.com/jbokser/rideolgy2gpx
   Author: Juan S. Bokser <juan.bokser@gmail.com> 
-  Version: 1.0
+  Version: 1.1b
 
 Options:
   -v, --version                   Show version and exit.
