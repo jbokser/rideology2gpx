@@ -20,16 +20,16 @@ def dinamic_help_decorator(f):
     return f
 
 filter_options = [
-        'From-zero-to-100-kmh',
-        'From-20-to-120-kmh',
-        'From-100-to-200-kmh',
-        'From-zero-to-max-speed',
-        'Chop-1km-at-end',
-        'Chop-1km-at-start',
-        'Chop-1km-at-start-and-end',
-        'Chop-3km-at-end',
-        'Chop-3km-at-start',
-        'Chop-3km-at-start-and-end'
+        'from-0-to-100-kmh',
+        'from-20-to-120-kmh',
+        'from-100-to-200-kmh',
+        'from-0-to-top-speed',
+        'chop-1km-at-end',
+        'chop-1km-at-start',
+        'chop-1km-at-start-and-end',
+        'chop-3km-at-end',
+        'chop-3km-at-start',
+        'chop-3km-at-start-and-end'
     ]
 
 filter_options_str = "\n".join([ f"   {o}" for o in filter_options ])
@@ -77,45 +77,56 @@ def cli(csv_file, start_time, show_version=False, data_filter=None, graph=None):
     ending_chop = 0
     starting_chop = 0
     subtitle = ''
+    out_filename_suffix = ''
 
-    if data_filter == 'From-zero-to-100-kmh':
+    if data_filter == 'from-0-to-100-kmh':
         min_speed = 0
         max_speed = 100
         subtitle = 'from stop to 100 km/h'
+        out_filename_suffix='(0-100kmh)'
 
-    elif data_filter == 'From-20-to-120-kmh':
+    elif data_filter == 'from-20-to-120-kmh':
         min_speed = 20
         max_speed = 120
         subtitle = 'from 20 km/h to 100 km/h'
+        out_filename_suffix='(20-120kmh)'
 
-    elif data_filter == 'From-100-to-200-kmh':
+    elif data_filter == 'from-100-to-200-kmh':
         min_speed = 100
         max_speed = 200
         subtitle = 'from 100 km/h to 200 km/h'
+        out_filename_suffix='(100-200kmh)'
 
-    elif data_filter == 'From-zero-to-max-speed':
+    elif data_filter == 'from-0-to-top-speed':
         min_speed = 0
-        subtitle = 'from stop to max speed'
+        subtitle = 'from stop to top speed'
+        out_filename_suffix='(0-top-kmh)'
 
-    elif data_filter == 'Chop-1km-at-end':
+    elif data_filter == 'chop-1km-at-end':
         ending_chop = 1
+        out_filename_suffix='chop'
 
-    elif data_filter == 'Chop-1km-at-start':
+    elif data_filter == 'chop-1km-at-start':
         starting_chop = 1
+        out_filename_suffix='chop'
 
-    elif data_filter == 'Chop-1km-at-start-and-end':
+    elif data_filter == 'chop-1km-at-start-and-end':
         ending_chop = 1
         starting_chop = 1
+        out_filename_suffix='chop'
 
-    elif data_filter == 'Chop-3km-at-end':
+    elif data_filter == 'chop-3km-at-end':
         ending_chop = 3
+        out_filename_suffix='chop'
 
-    elif data_filter == 'Chop-1km-at-start':
+    elif data_filter == 'chop-1km-at-start':
         starting_chop = 3
+        out_filename_suffix='chop'
 
-    elif data_filter == 'Chop-3km-at-start-and-end':
+    elif data_filter == 'chop-3km-at-start-and-end':
         ending_chop = 3
         starting_chop = 3
+        out_filename_suffix='chop'
 
     main(
         csv_file,
@@ -126,5 +137,6 @@ def cli(csv_file, start_time, show_version=False, data_filter=None, graph=None):
         ending_chop = ending_chop,
         starting_chop = starting_chop,
         subtitle = subtitle,
-        do_graph = graph
+        do_graph = graph,
+        out_filename_suffix = out_filename_suffix
     )

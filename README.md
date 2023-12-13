@@ -71,16 +71,16 @@ Options:
   -h, --help                      Show this message and exit.
 
   The valid values ​​for FILTER are:
-     From-zero-to-100-kmh
-     From-20-to-120-kmh
-     From-100-to-200-kmh
-     From-zero-to-max-speed
-     Chop-1km-at-end
-     Chop-1km-at-start
-     Chop-1km-at-start-and-end
-     Chop-3km-at-end
-     Chop-3km-at-start
-     Chop-3km-at-start-and-end
+     from-0-to-100-kmh
+     from-20-to-120-kmh
+     from-100-to-200-kmh
+     from-0-to-top-speed
+     chop-1km-at-end
+     chop-1km-at-start
+     chop-1km-at-start-and-end
+     chop-3km-at-end
+     chop-3km-at-start
+     chop-3km-at-start-and-end
 user@host:~/tmp/rideology2gpx$ rideology2gpx example/ride.csv -d "1979-08-09 09:25:00"
 Make file 'example/ride.gpx'... Ok
 Make file 'example/ride_gear_shifts.gpx'... Ok

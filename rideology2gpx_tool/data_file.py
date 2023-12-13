@@ -101,6 +101,9 @@ class DataFile():
     def __bool__(self):
         return bool(self.table)
 
+    def __len__(self):
+        return len(self.table)
+
     @property
     def title(self):
         if self._title is None:
@@ -225,8 +228,10 @@ class DataFile():
 
     @property
     def avg_speed(self):
-        return int(self._lst_avg([r['wheel_speed'] for r in self.table if r[
-            'wheel_speed']]))
+        try:
+            return int(self._lst_avg([r['wheel_speed'] for r in self.table if r['wheel_speed']]))
+        except ZeroDivisionError:
+            return None
 
     @property
     def max_for_each_gear(self):
@@ -257,7 +262,9 @@ class DataFile():
         if self.avg_idle_speed:
             table.append([F('Avg idle speed'), f"{self.avg_idle_speed} rpm"])
 
-        table.append([F('Avg speed'), f"{self.avg_speed} km/h"])
+        if self.avg_speed:
+            table.append([F('Avg speed'), f"{self.avg_speed} km/h"])
+        
         table.append([F('Total time'), f"{self._timedelta_str(self.elapsed_time)}"])
         table.append([F('Distance'), f"{self.distance:.2f} km"])
         table.append([F('Starting point'), str(self.start)])
@@ -389,10 +396,12 @@ Max for each gear
 
         return df
 
-    def dump_md(self, basenane=None, start_time=None, silent=True):
+    def dump_md(self, basename=None, start_time=None, silent=True):
 
-        if basenane is None:
+        if basename is None:
             basename = self.filename.stem
+        else:
+            basename = Path(basename).stem
 
         for field, unit in [
                 ("Wheel speed", "km/h"),
@@ -452,9 +461,9 @@ Max for each gear
 
         def get_values(table):
             values = []
-            for i in range(len(table[0])):
-                values.append([x[i] for x in table])
-        
+            if table:
+                for i in range(len(table[0])):
+                    values.append([x[i] for x in table])
             return values
 
         table = self._table_report()
@@ -548,10 +557,12 @@ Max for each gear
         if not silent:
             print(" Ok")
 
-    def dump(self, basenane=None, show_report=False, silent=True, start_time=None):
+    def dump(self, basename=None, show_report=False, silent=True, start_time=None):
 
-        if basenane is None:
+        if basename is None:
             basename = self.filename.stem
+        else:
+            basename = Path(basename).stem
 
         self.new_gpxfile(start_time=start_time).dump_to_file(
             self.filename.with_name(basename), silent=silent)
