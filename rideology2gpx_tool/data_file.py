@@ -396,12 +396,18 @@ Max for each gear
 
         return df
 
-    def dump_md(self, basename=None, start_time=None, silent=True):
+    def dump_md(self, basename=None, start_time=None, silent=True,
+                output_dir=None):
 
         if basename is None:
             basename = self.filename.stem
         else:
             basename = Path(basename).stem
+
+        if output_dir is None:
+            filename = self.filename.with_name(basename)
+        else:
+            filename = (output_dir / Path(basename)) 
 
         for field, unit in [
                 ("Wheel speed", "km/h"),
@@ -448,7 +454,7 @@ Max for each gear
 
             fig.update_layout(title=title)
 
-            image_filename = self.filename.with_name(
+            image_filename = filename.with_name(
                 f"{basename}{posname}").with_suffix('.jpeg')
 
             if not silent:
@@ -483,7 +489,7 @@ Max for each gear
 
         fig.update_layout(title=title)
 
-        image_filename = self.filename.with_name(
+        image_filename = filename.with_name(
             f"{basename}_table").with_suffix('.jpeg')
 
         if not silent:
@@ -511,7 +517,7 @@ Max for each gear
 
         fig.update_layout(title=title)
 
-        image_filename = self.filename.with_name(
+        image_filename = filename.with_name(
             f"{basename}_max_for_each_gear").with_suffix('.jpeg')
 
         if not silent:
@@ -545,7 +551,7 @@ Max for each gear
  ![Gear position graph]({basename}_gear_position.jpeg)
 
 """
-        report_filename = self.filename.with_name(
+        report_filename = filename.with_name(
             f"{basename}_report").with_suffix('.md')
 
         if not silent:
@@ -557,25 +563,31 @@ Max for each gear
         if not silent:
             print(" Ok")
 
-    def dump(self, basename=None, show_report=False, silent=True, start_time=None):
+    def dump(self, basename=None, show_report=False, silent=True,
+             start_time=None, output_dir=None):
 
         if basename is None:
             basename = self.filename.stem
         else:
             basename = Path(basename).stem
 
+        if output_dir is None:
+            filename = self.filename.with_name(basename)
+        else:
+            filename = (output_dir / Path(basename)) 
+
         self.new_gpxfile(start_time=start_time).dump_to_file(
-            self.filename.with_name(basename), silent=silent)
+            filename.with_name(basename), silent=silent)
         
         self.new_gpxfile_gear_shifts(start_time=start_time).dump_to_file(
-            self.filename.with_name(f"{basename}_gear_shifts"),
+            filename.with_name(f"{basename}_gear_shifts"),
             silent=silent)
         
         self.new_gpxfile_speed_shifts(start_time=start_time).dump_to_file(
-            self.filename.with_name(f"{basename}_speed_shifts"),
+            filename.with_name(f"{basename}_speed_shifts"),
             silent=silent)
         
-        report_filename = self.filename.with_name(
+        report_filename = filename.with_name(
             f"{basename}_report").with_suffix('.txt')
 
         if not silent:

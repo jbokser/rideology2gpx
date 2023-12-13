@@ -15,6 +15,7 @@ def bye(text=None, code=1):
 
 def main(
         filename = 'example/ride.csv',
+        output_dir = None,
         silent=False,
         start_time=None,
         min_speed = None,
@@ -66,13 +67,15 @@ def main(
     datafile.dump(
         basename=basename,
         silent=silent,
-        start_time=start_time)
+        start_time=start_time,
+        output_dir=output_dir)
     
     if do_graph:
         datafile.dump_md(
             basename=basename,
             silent=silent,
-            start_time=start_time)
+            start_time=start_time,
+            output_dir=output_dir)
     
     if not silent:
         print(datafile.report)
