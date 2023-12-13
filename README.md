@@ -60,7 +60,7 @@ Usage: rideology2gpx [OPTIONS] [CSV_FILE]
 
   For more info: https://github.com/jbokser/rideolgy2gpx
   Author: Juan S. Bokser <juan.bokser@gmail.com> 
-  Version: 0.1b2
+  Version: 0.1b3
 
 Options:
   -v, --version                   Show version and exit.
