@@ -60,13 +60,14 @@ Usage: rideology2gpx [OPTIONS] [CSV_FILE]
 
   For more info: https://github.com/jbokser/rideolgy2gpx
   Author: Juan S. Bokser <juan.bokser@gmail.com> 
-  Version: 0.1b
+  Version: 0.1b2
 
 Options:
   -v, --version                   Show version and exit.
   -d, --date [%Y-%m-%d %H:%M:%S]  Starting datetime for the track in the GPX
                                   files.
   -f, --filter FILTER             Filter applied to waypoints.
+  -g, --graph                     Make graphs and md report.
   -h, --help                      Show this message and exit.
 
   The valid values ​​for FILTER are:
@@ -89,15 +90,15 @@ Make file 'example/ride_report.txt'... Ok
 From gas station to next gas station
 ==== === ======= == ==== === =======
     
-Max engine speed: 3846 rpm
-Max wheel speed:  60 km/h
-Max water temp:   101 ℃
-Avg idle speed:   1202 rpm
-Avg speed:        30 km/h
-Total time:       0:07:49
-Distance:         1.87 km
-Starting point:   S034°30′29.52″ E058°28′46.70″
-Ending point:     S034°29′53.65″ E058°29′02.93″
+Max engine speed:  3846 rpm
+Max wheel speed:   60 km/h
+Max water temp:    101 ℃
+Avg idle speed:    1202 rpm
+Avg speed:         30 km/h
+Total time:        0:07:49
+Distance:          1.87 km
+Starting point:    S034°30′29.52″ E058°28′46.70″
+Ending point:      S034°29′53.65″ E058°29′02.93″
 
 Max for each gear
 --- --- ---- ----
