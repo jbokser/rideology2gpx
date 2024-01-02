@@ -6,26 +6,29 @@ from datetime import datetime
 from pathlib import Path
 from tabulate import tabulate
 from .main import main
-from .app_info import version, author, author_email, repo_url
+from .app_info import app_info, version
+
+
 
 dt_formats = ['%Y-%m-%d %H:%M:%S']
 dt_str_default = datetime.now().strftime(dt_formats[0])
 
 
-def dinamic_help_decorator(f):
-    doc = f.__doc__
-    doc = doc.replace('{version}', version)
-    doc = doc.replace('{author}', author)
-    doc = doc.replace('{author_email}', author_email)
-    doc = doc.replace('{repo_url}', repo_url)
-    f.__doc__ = doc
-    return f
+def dinamic_help_decorator(**wildcards):
+    def fnc(f):
+        doc = f.__doc__
+        for key, value in wildcards.items():
+            doc = doc.replace('{' + key + '}', value)
+        f.__doc__ = doc
+        return f
+    return fnc
 
 filter_options = [
         'from-0-to-100-kmh',
         'from-20-to-120-kmh',
         'from-100-to-200-kmh',
         'from-0-to-top-speed',
+        'from-60-to-top-speed',
         'chop-1km-at-end',
         'chop-1km-at-start',
         'chop-1km-at-start-and-end',
@@ -67,7 +70,7 @@ The valid values ​for FILTER are:
 @argument('output_dir', type=TypePath(), required=False)
 @option('-g', '--graph', 'graph', is_flag=True,
     help='Make graphs and md report.')
-@dinamic_help_decorator
+@dinamic_help_decorator(**app_info)
 def cli(csv_file, output_dir, start_time,
         show_version=False, data_filter=None, graph=None):
     """
@@ -125,6 +128,11 @@ def cli(csv_file, output_dir, start_time,
     elif data_filter == 'from-0-to-top-speed':
         min_speed = 0
         subtitle = 'from stop to top speed'
+        out_filename_suffix='(0-top-kmh)'
+
+    elif data_filter == 'from-60-to-top-speed':
+        min_speed = 60
+        subtitle = 'from 60 km/h to top speed'
         out_filename_suffix='(0-top-kmh)'
 
     elif data_filter == 'chop-1km-at-end':
