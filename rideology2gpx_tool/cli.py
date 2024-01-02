@@ -133,7 +133,7 @@ def cli(csv_file, output_dir, start_time,
     elif data_filter == 'from-60-to-top-speed':
         min_speed = 60
         subtitle = 'from 60 km/h to top speed'
-        out_filename_suffix='(0-top-kmh)'
+        out_filename_suffix='(60-top-kmh)'
 
     elif data_filter == 'chop-1km-at-end':
         ending_chop = 1
