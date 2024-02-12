@@ -64,10 +64,10 @@ class DataFile():
             all_names = ['elapsed_msec', 'gps_latitude', 'gps_longitude',
                         'instant_fuel_consumption', 'water_temperature',
                         'boost_temperature', 'engine_rpm', 'wheel_speed',
-                        'x', 'acceleration', 'throttle_position',
-                        'boost_pressure', 'gear_position',
-                        'brake_pressure_fr_caliper', 'lean_angle',
-                        'rideology_score']
+                        'acceleration', 'throttle_position',
+                        'accel_grip_position', 'boost_pressure',
+                        'gear_position', 'brake_pressure_fr_caliper',
+                        'lean_angle', 'rideology_score']
             
             formulas = {
                 'elapsed_time': lambda d: timedelta(
@@ -85,7 +85,8 @@ class DataFile():
             i=0
             for line in str(self).split('\n'):
                 line_list = [f.strip() for f in line.split(sep)]
-                if len(line_list)==len(all_names):
+                if len(line_list)==len(all_names) and \
+                        line_list[0].replace('"', '')!=all_names[0]:
                     full_data = dict(zip(all_names, line_list))
                     i+=1
                     row = {'index': i}
