@@ -27,6 +27,8 @@ filter_options = [
         'from-0-to-100-kmh',
         'from-20-to-120-kmh',
         'from-100-to-200-kmh',
+        'from-100-to-top-speed',
+        'from-120-to-top-speed',
         'from-0-to-top-speed',
         'from-60-to-top-speed',
         'chop-1km-at-end',
@@ -134,6 +136,16 @@ def cli(csv_file, output_dir, start_time,
         min_speed = 60
         subtitle = 'from 60 km/h to top speed'
         out_filename_suffix='(60-top-kmh)'
+
+    elif data_filter == 'from-100-to-top-speed':
+        min_speed = 100
+        subtitle = 'from 100 km/h to top speed'
+        out_filename_suffix='(100-top-kmh)'
+
+    elif data_filter == 'from-120-to-top-speed':
+        min_speed = 120
+        subtitle = 'from 120 km/h to top speed'
+        out_filename_suffix='(120-top-kmh)'
 
     elif data_filter == 'chop-1km-at-end':
         ending_chop = 1
