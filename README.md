@@ -61,7 +61,7 @@ Usage: rideology2gpx [OPTIONS] [CSV_FILE] [OUTPUT_DIR]
   CSV_FILE - File obtained with the Kawasaki Rideology App.
   OUTPUT_DIR - Optional output directory where the files will be created.
 
-  For more info: https://github.com/jbokser/rideolgy2gpx
+  For more info: https://github.com/jbokser/rideology2gpx
   Author: Juan S. Bokser <juan.bokser@gmail.com> 
   Version: 1.1b3
 
