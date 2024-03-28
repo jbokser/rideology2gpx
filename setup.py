@@ -1,46 +1,34 @@
 from setuptools import setup, find_packages
-from os.path    import dirname, abspath
+from os.path import dirname, abspath
+from rideology2gpx_tool.app_info import (version, author, author_email,
+    description, app_name, author_user, repo_url)
 
-name = 'rideology2gpx'
+
+
 base_dir = dirname(abspath(__file__))
 
+# Get the long description from README.md
 with open(base_dir + "/README.md", "r") as file_:
     long_description = file_.read()
 
-version = None
-with open(base_dir + "/" + name + "_tool/app_info.py", "r") as file_:
-    for l in file_.readlines():
-        if 'version' in l and '=' in l:
-            d = {}
-            exec(l, {}, d)
-            if 'version' in d:
-                version = d['version']
-                break
-if not version:
-    raise(Exception('No version defined!'))
-
-# Fix some links
-
-url = "https://github.com/jbokser/" + name
-
+# Fix some links in the long description
 long_description = long_description.replace(
-    "](" + url + ")",
-    "](" + url + "/tree/v" + version + ")"
+    "](" + repo_url + ")",
+    "](" + repo_url + "/tree/v" + version + ")"
 )
-
 long_description = long_description.replace(
     "](docs/",
-    "](" + url + "/blob/v" + version + "/docs/"
+    "](" + repo_url + "/blob/v" + version + "/docs/"
 )
-
 long_description = long_description.replace(
     "![](images/",
-    "![](https://raw.githubusercontent.com/jbokser/rideology2gpx/main/images/"
+    f"![](https://raw.githubusercontent.com/{author_user}/{app_name}/main/images/"
 )
 
+# Get the list of requirements
 requirements = []
 requires_files = ["/requirements.txt",
-                  "/" + name + ".egg-info/requires.txt"]
+                  "/" + app_name + ".egg-info/requires.txt"]
 for file_path in requires_files:
     try:
         with open(base_dir + file_path, "r") as file_:
@@ -53,12 +41,12 @@ if not requirements:
     raise(Exception('Empty requirements!'))
 
 setup(
-    name=name ,
+    name=app_name ,
     version=version,
     packages=find_packages(),
-    author='Juan S. Bokser',
-    author_email='juan.bokser@gmail.com',
-    description='A simple command line program to transform log files obtained with the Kawasaki Rideology App into GPX files.',
+    author=author,
+    author_email=author_email,
+    description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -69,5 +57,5 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=requirements,
-    scripts=[name]
+    scripts=[app_name]
 )
