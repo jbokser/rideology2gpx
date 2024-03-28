@@ -1,22 +1,27 @@
-from click import command, option, argument, Choice
+from click import command, option, argument 
 from click import Path as TypePath
 from click import DateTime as TypeDateTime
 from click import IntRange as TypeIntRange
 from click.exceptions import UsageError, BadParameter
 from datetime import datetime
 from pathlib import Path
-from tabulate import tabulate
 from .main import main
 from .app_info import app_info, version
+from typing import List, Callable
 
 
 
-dt_formats = ['%Y-%m-%d %H:%M:%S']
-dt_str_default = datetime.now().strftime(dt_formats[0])
+# Input date format
+dt_formats: List[str] = ['%Y-%m-%d %H:%M:%S']
+dt_str_default: str = datetime.now().strftime(dt_formats[0])
 
 
-def dinamic_help_decorator(**wildcards):
-    def fnc(f):
+def dinamic_help_decorator(**wildcards) -> Callable:
+    """
+    Dynamically change the __doc__ of a function by replacing wildcards
+    with data
+    """
+    def fnc(f: Callable) -> Callable:
         doc = f.__doc__
         for key, value in wildcards.items():
             doc = doc.replace('{' + key + '}', value)
@@ -130,7 +135,7 @@ def cli(csv_file, output_dir, start_time,
     main(
         csv_file,
         output_dir = output_dir,
-        silent=False,
+        silent = False,
         start_time=start_time,
         min_speed = min_speed,
         max_speed = max_speed,
