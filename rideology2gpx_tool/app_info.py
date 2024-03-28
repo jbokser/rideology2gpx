@@ -1,4 +1,4 @@
-version: str = '1.1b4'
+version: str = '1.1'
 author: str = 'Juan S. Bokser'
 author_email: str = 'juan.bokser@gmail.com'
 description: str = 'A simple command line program to transform log files obtained with the Kawasaki Rideology App into GPX files.'
