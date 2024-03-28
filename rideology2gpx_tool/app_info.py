@@ -2,7 +2,7 @@ version: str = '1.1b4'
 author: str = 'Juan S. Bokser'
 author_email: str = 'juan.bokser@gmail.com'
 description: str = 'A simple command line program to transform log files obtained with the Kawasaki Rideology App into GPX files.'
-app_name: str = 'rideolgy2gpx'
+app_name: str = 'rideology2gpx'
 author_user: str = 'jbokser'
 repo_url: str = f"https://github.com/{author_user}/{app_name}"
 
