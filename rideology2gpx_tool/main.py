@@ -4,7 +4,10 @@ from .data_file import DataFile
 from pathlib import Path
 
 
-def bye(text=None, code=1):
+def bye(text=None, code=1) -> None:
+    """
+    Replacement of exit() function
+    """
     if text:
         print(
             (text if code==0 else f"Error, {text}"),
@@ -16,8 +19,8 @@ def bye(text=None, code=1):
 def main(
         filename = 'example/ride.csv',
         output_dir = None,
-        silent=False,
-        start_time=None,
+        silent = False,
+        start_time = None,
         min_speed = None,
         max_speed = None,
         ending_chop = 0,
@@ -25,7 +28,7 @@ def main(
         subtitle = '',
         do_graph = False,
         out_filename_suffix = ''
-        ):
+        ) -> None:
 
     datafile = DataFile(filename)
 

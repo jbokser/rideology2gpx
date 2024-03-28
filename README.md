@@ -61,23 +61,21 @@ Usage: rideology2gpx [OPTIONS] [CSV_FILE] [OUTPUT_DIR]
   CSV_FILE - File obtained with the Kawasaki Rideology App.
   OUTPUT_DIR - Optional output directory where the files will be created.
 
-  For more info: https://github.com/jbokser/rideolgy2gpx
+  For more info: https://github.com/jbokser/rideology2gpx
   Author: Juan S. Bokser <juan.bokser@gmail.com> 
-  Version: 1.0
+  Version: 1.1b3
 
 Options:
   -v, --version                   Show version and exit.
   -d, --date [%Y-%m-%d %H:%M:%S]  Starting datetime for the track in the GPX
                                   files.
-  -f, --filter FILTER             Filter applied to waypoints.
   -g, --graph                     Make graphs and md report.
+  -s, --starting-chop X           Cut the first X kilometres.  [0<=x<=10]
+  -e, --ending-chop X             Cut the last X kilometres.  [0<=x<=10]
+  -a, --acceleration MIN_SPEED MAX_SPEED
+                                  Filters waypoints to only what is included
+                                  between the speeds.
   -h, --help                      Show this message and exit.
-
-  The valid values ​for FILTER are:
-    from-0-to-100-kmh          from-20-to-120-kmh  from-100-to-200-kmh
-    from-0-to-top-speed        chop-1km-at-end     chop-1km-at-start
-    chop-1km-at-start-and-end  chop-3km-at-end     chop-3km-at-start
-    chop-3km-at-start-and-end
 user@host:~/tmp/rideology2gpx$ rideology2gpx example/ride.csv -d "1979-08-09 09:25:00"
 Make file 'example/ride.gpx'... Ok
 Make file 'example/ride_gear_shifts.gpx'... Ok
