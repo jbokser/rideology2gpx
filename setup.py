@@ -7,9 +7,11 @@ from rideology2gpx_tool.app_info import (version, author, author_email,
 
 base_dir = dirname(abspath(__file__))
 
+
 # Get the long description from README.md
 with open(base_dir + "/README.md", "r") as file_:
     long_description = file_.read()
+
 
 # Fix some links in the long description
 long_description = long_description.replace(
@@ -24,6 +26,7 @@ long_description = long_description.replace(
     "![](images/",
     f"![](https://raw.githubusercontent.com/{author_user}/{app_name}/main/images/"
 )
+
 
 # Get the list of requirements
 requirements = []
@@ -40,6 +43,7 @@ for file_path in requires_files:
 if not requirements:
     raise(Exception('Empty requirements!'))
 
+
 setup(
     name=app_name ,
     version=version,
@@ -50,10 +54,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3'
     ],
     python_requires='>=3.6',
     install_requires=requirements,
