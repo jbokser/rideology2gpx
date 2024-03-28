@@ -19,8 +19,7 @@ tag:
 	git tag -a "v$(VERSION)" -m "v$(VERSION)"
 
 build:
-	rm -rf dist
-	python3 setup.py sdist
+	python3 -m build --sdist --wheel
 
 upload:
 	twine upload dist/*
