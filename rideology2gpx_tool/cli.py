@@ -130,7 +130,7 @@ def cli(csv_file, output_dir, start_time,
     if ending_chop or starting_chop:
         out_filename_suffix.append('chop')
 
-    out_filename_suffix = '-'.join(out_name_suffix)file
+    out_filename_suffix = '-'.join(out_filename_suffix)
     
     main(
         csv_file,
