@@ -121,7 +121,8 @@ class DataFile():
     def title(self):
         if self._title is None:
             self._title = list(filter(lambda s: s.startswith('Title,,'),
-                                      str(self).split('\n')))[0][7:]
+                                      str(self).split('\n')))[0][7:]           
+            self._title = ''.join(c for c in self._title if ord(c) < 128).strip()
         return self._title
         
     @title.setter
