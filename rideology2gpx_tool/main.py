@@ -64,6 +64,7 @@ def main(
         datafile.title = f"{datafile.title}, {subtitle}"
 
     basename = datafile.filename.stem
+    basename = '_'.join(basename.split()).strip().lower()
 
     if out_filename_suffix:
         basename = Path(f"{basename}_({out_filename_suffix})").stem
