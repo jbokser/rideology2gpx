@@ -469,7 +469,7 @@ Max for each gear
             fig.update_layout(title=title)
 
             image_filename = filename.with_name(
-                f"{basename}{posname}").with_suffix('.jpeg')
+                f"{basename}{posname}").with_suffix('.jpg')
 
             if not silent:
                 print(f"Make file {repr(str(image_filename))}...", end="")
@@ -504,7 +504,7 @@ Max for each gear
         fig.update_layout(title=title)
 
         image_filename = filename.with_name(
-            f"{basename}_table").with_suffix('.jpeg')
+            f"{basename}_table").with_suffix('.jpg')
 
         if not silent:
             print(f"Make file {repr(str(image_filename))}...", end="")
@@ -532,7 +532,7 @@ Max for each gear
         fig.update_layout(title=title)
 
         image_filename = filename.with_name(
-            f"{basename}_max_for_each_gear").with_suffix('.jpeg')
+            f"{basename}_max_for_each_gear").with_suffix('.jpg')
 
         if not silent:
             print(f"Make file {repr(str(image_filename))}...", end="")
@@ -560,9 +560,9 @@ Max for each gear
 
 ## Graphics
 
- ![Wheel speed graph]({basename}_wheel_speed.jpeg)
- ![Engine rpm graph]({basename}_engine_rpm.jpeg)
- ![Gear position graph]({basename}_gear_position.jpeg)
+ ![Wheel speed graph]({basename}_wheel_speed.jpg)
+ ![Engine rpm graph]({basename}_engine_rpm.jpg)
+ ![Gear position graph]({basename}_gear_position.jpg)
 
 """
         report_filename = filename.with_name(

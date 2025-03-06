@@ -23,8 +23,8 @@
 
 ## Graphics
 
- ![Wheel speed graph](ride_wheel_speed.jpeg)
- ![Engine rpm graph](ride_engine_rpm.jpeg)
- ![Gear position graph](ride_gear_position.jpeg)
+ ![Wheel speed graph](ride_wheel_speed.jpg)
+ ![Engine rpm graph](ride_engine_rpm.jpg)
+ ![Gear position graph](ride_gear_position.jpg)
 
 
