@@ -48,11 +48,23 @@ class DataFile():
 
     def __str__(self):
         if self._text is None:
-            file = open(self._filename, "r")
-            self._text = ""
-            with file:
-                for line in file.readlines():
-                    self._text += line
+            def file_to_text():
+                for encoding in ['utf-8', 'windows-1252']:
+                    file = open(self._filename, "r", encoding=encoding)
+                    out = ""
+                    error = None
+                    try:
+                        with file:
+                            for line in file.readlines():
+                                out += line
+                    except UnicodeDecodeError as e:
+                        error = e
+                    if error is None:
+                        break
+                if error:
+                    raise error
+                return out
+            self._text = file_to_text()
         return self._text
     
     @property
