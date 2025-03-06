@@ -270,7 +270,7 @@ class DataFile():
 
         table.append([F('Max engine speed'), f"{self.max_engine_rpm} rpm"])
         table.append([F('Max wheel speed'), f"{self.max_wheel_speed} km/h"])
-        table.append([F('Max water temp'), f"{self.max_water_temperature} ℃"])
+        table.append([F('Max water temp'), f"{self.max_water_temperature} °C"])
 
         if self.avg_idle_speed:
             table.append([F('Avg idle speed'), f"{self.avg_idle_speed} rpm"])

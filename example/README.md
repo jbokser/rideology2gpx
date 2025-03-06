@@ -20,7 +20,7 @@ From gas station to next gas station
     
 Max engine speed:  3846 rpm
 Max wheel speed:   60 km/h
-Max water temp:    101 ℃
+Max water temp:    101 °C
 Avg idle speed:    1202 rpm
 Avg speed:         30 km/h
 Total time:        0:07:49
