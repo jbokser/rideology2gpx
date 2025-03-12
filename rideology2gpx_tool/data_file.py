@@ -317,7 +317,10 @@ class DataFile():
             delta = l['elapsed_time'] - last_elapsed_time
             value = l[field]
             if isinstance(value, str):
-                value = int(value)
+                try:
+                    value = int(value)
+                except ValueError:
+                    value = 0
             last_elapsed_time = l['elapsed_time']
             
             if value>=threshold:
