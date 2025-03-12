@@ -9,6 +9,20 @@ from pandas import DataFrame, Series, to_numeric
 from .gpx_file import GpxFile
 
 
+def td_to_str(td: timedelta) -> str:
+    h, r = divmod(td.seconds, 3600)
+    m, s = divmod(r, 60)
+    l = []
+    if h:
+        l.append(f"{h}h")
+    if m or l:
+        l.append(f"{m}m")
+    if s or not(l):  
+        l.append(f"{s}s")       
+    str = ' '.join(l)
+    return str
+
+
 class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
 
     @staticmethod
@@ -296,6 +310,39 @@ class DataFile():
 
         return tabulate(table, **kargs)
 
+    def _time_above(self, field='wheel_speed', threshold=60):
+        last_elapsed_time = self.table[0]['elapsed_time']
+        time = timedelta(seconds=0) 
+        for l in self.table[1:]:
+            delta = l['elapsed_time'] - last_elapsed_time
+            value = l[field]
+            if isinstance(value, str):
+                value = int(value)
+            last_elapsed_time = l['elapsed_time']
+            
+            if value>=threshold:
+                time += delta
+        return time
+    
+    def _time_dist(self, field='wheel_speed', step=20):
+
+        threshold=0
+        data = []
+        while True:
+            time = self._time_above(field, threshold)
+            if time:
+                data.append((threshold, time))
+                threshold += step
+            else:
+                break
+        data.reverse()
+        out = []
+        for i, (threshold, t) in enumerate(data):
+            time = (t - data[i-1][1]) if i else t
+            out.append(((threshold, threshold+step), time))
+        out.reverse()
+        return out
+    
     @property
     def distance(self):
         km = 0
@@ -346,7 +393,6 @@ Max for each gear
             prev_latitude, prev_longitude = latitude, longitude
         self._table = new_table
         return self
-
 
     def filter_by_speed(self, min_=0.0, max_=None):
 
@@ -479,6 +525,82 @@ Max for each gear
             if not silent:
                 print(" Ok")
 
+        for field in ['gear_position', 'engine_rpm', 'wheel_speed']:
+
+            title = {
+                'wheel_speed': 'Time distribution of wheel speed',
+                'engine_rpm': 'Time distribution of engine RPM',
+                'gear_position': 'Time distribution of gear position'
+            }.get(field, field)
+
+            xaxes_title = {
+                'wheel_speed': 'Wheel speed (Km/h)',
+                'engine_rpm': 'Engine RPM',
+                'gear_position': 'Gear position'
+            }.get(field, field)
+
+            step = {
+                'wheel_speed': 20,
+                'engine_rpm': 1000,
+                'gear_position': 1
+            }.get(field, 20)
+            
+            row_data = self._time_dist(field, step)
+        
+            data = [(s[0], t.total_seconds()/60) for (s, t) in row_data]
+            
+            df = DataFrame(data, columns=[field, 'time'])
+                
+            fig = px.area(df, x=field, y='time')
+
+            title = f"{title}, {' '.join(self.title.split())}"
+
+            fig.update_layout(title=title)
+
+            base_kargs = dict(showgrid=True, gridwidth=1,
+                gridcolor='LightPink',
+                minor=dict(ticklen=0, tickcolor="black", showgrid=True))
+                
+            fig.update_xaxes(title=xaxes_title, **base_kargs)           
+            fig.update_yaxes(title='Time (minutes)', **base_kargs)
+            tickvals = [s[0] for (s, t) in row_data]
+            if field=='gear_position':
+                tickvals=[0, 1, 2, 3, 4, 5, 6]
+                ticktext=['N', '1st', '2nd', '3rd', '4th', '5th', '6th']
+            else:
+                fig.update_xaxes(tickangle=60)           
+                ticktext = [f"{s[0]}~{s[1]}" for (s, t) in row_data]
+            fig.update_xaxes(tickvals=tickvals, ticktext=ticktext)
+
+            max_y = df.loc[df['time'].idxmax()]['time']
+            max_x = df.loc[df['time'].idxmax()][field]
+
+            fig.add_annotation(
+                text=td_to_str(timedelta(seconds=max_y*60)),
+                x=max_x, y=max_y*1.01,
+                arrowhead=1, showarrow=True
+            )
+
+            max_y = df.loc[df.last_valid_index()]['time']
+            max_x = df.loc[df.last_valid_index()][field]
+
+            fig.add_annotation(
+                text=td_to_str(timedelta(seconds=max_y*60)),
+                x=max_x, y=max_y*1.01,
+                arrowhead=1, showarrow=True
+            )
+
+            image_filename = filename.with_name(
+                    f"{basename}_td_{field}").with_suffix('.jpg')
+
+            if not silent:
+                print(f"Make file {repr(str(image_filename))}...", end="")
+                
+            fig.write_image(image_filename, width=800, height=350)
+
+            if not silent:
+                print(" Ok")
+
         def get_values(table):
             values = []
             if table:
@@ -563,6 +685,9 @@ Max for each gear
  ![Wheel speed graph]({basename}_wheel_speed.jpg)
  ![Engine rpm graph]({basename}_engine_rpm.jpg)
  ![Gear position graph]({basename}_gear_position.jpg)
+ ![Time distribution of wheel speed graph]({basename}_td_wheel_speed.jpg)
+ ![Time distribution of engine rpm graph]({basename}_td_engine_rpm.jpg)
+ ![Time distribution of gear position graph]({basename}_td_gear_position.jpg)
 
 """
         report_filename = filename.with_name(
@@ -646,7 +771,6 @@ Max for each gear
 
         return gpxfile
 
-
     def new_gpxfile_gear_shifts(self, postitle=" (gear shifts)", start_time = None):
 
         gpxfile = GpxFile(start_time=start_time)
@@ -663,7 +787,6 @@ Max for each gear
             gpxfile.add_way_point(*args)
 
         return gpxfile
-
 
     def new_gpxfile_speed_shifts(self, chunk=1, postitle=" (speed shifts)", start_time=None):
         gpxfile = GpxFile(start_time=start_time)
