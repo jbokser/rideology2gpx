@@ -47,6 +47,14 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
     def __str__(self):
         return f"{self.sexagesimal}"
 
+    def km_to(self, coor) -> float:
+        if not isinstance(coor, Coordinate):
+            raise TypeError("coor must be a Coordinate instance")
+        delta_latitude = abs(coor.latitude - self.latitude)
+        delta_longitude = abs(coor.longitude - self.longitude)
+        km = ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
+        return km
+
 
 class DataFile():
 
@@ -345,18 +353,55 @@ class DataFile():
             out.append(((threshold, threshold+step), time))
         out.reverse()
         return out
+
+    def _distance_above(self, field='wheel_speed', threshold=60):
+        km = 0
+        prev_coor = Coordinate(
+            self.table[0]['gps_latitude'],
+            self.table[0]['gps_longitude'])        
+        for l in self.table[1:]:
+            coor = Coordinate(l['gps_latitude'], l['gps_longitude'])
+            delta = prev_coor.km_to(coor)
+            value = l[field]
+            if isinstance(value, str):
+                try:
+                    value = int(value)
+                except ValueError:
+                    value = 0
+            prev_coor = coor
+            if value>=threshold:
+                km += delta
+        return km
     
+    def _distance_dist(self, field='wheel_speed', step=20):
+
+        threshold=0
+        data = []
+        while True:
+            distance = self._distance_above(field, threshold)
+            if distance:
+                data.append((threshold, distance))
+                threshold += step
+            else:
+                break
+        data.reverse()
+        out = []
+        for i, (threshold, d) in enumerate(data):
+            distance = (d - data[i-1][1]) if i else d
+            out.append(((threshold, threshold+step), distance))
+        out.reverse()
+        return out
+
     @property
     def distance(self):
         km = 0
-        prev_latitude = self.table[0]['gps_latitude']
-        prev_longitude = self.table[0]['gps_longitude']
+        prev_coor = Coordinate(
+            self.table[0]['gps_latitude'],
+            self.table[0]['gps_longitude'])
         for r in self.table:
-            latitude, longitude = r['gps_latitude'], r['gps_longitude']
-            delta_latitude = abs(latitude - prev_latitude)
-            delta_longitude = abs(longitude - prev_longitude)
-            km += ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
-            prev_latitude, prev_longitude = latitude, longitude
+            coor = Coordinate(r['gps_latitude'], r['gps_longitude'])
+            km += prev_coor.km_to(coor)
+            prev_coor = coor
         return km
 
     @property
@@ -379,21 +424,20 @@ Max for each gear
         if d<0:
             total = self.distance + d
         km = 0
-        prev_latitude = self.table[0]['gps_latitude']
-        prev_longitude = self.table[0]['gps_longitude']
+        prev_coor = Coordinate(
+            self.table[0]['gps_latitude'],
+            self.table[0]['gps_longitude'])
         new_table = []
         for r in self.table:
-            latitude, longitude = r['gps_latitude'], r['gps_longitude']
-            delta_latitude = abs(latitude - prev_latitude)
-            delta_longitude = abs(longitude - prev_longitude)
-            km += ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
+            coor = Coordinate(r['gps_latitude'], r['gps_longitude'])
+            km += prev_coor.km_to(coor)
             if d<0:
                 if km<=total:
                     new_table.append(r)
             else:
                 if km>=d:
                     new_table.append(r)
-            prev_latitude, prev_longitude = latitude, longitude
+            prev_coor = coor
         self._table = new_table
         return self
 
@@ -604,6 +648,82 @@ Max for each gear
             if not silent:
                 print(" Ok")
 
+        for field in ['gear_position', 'engine_rpm', 'wheel_speed']:
+
+            title = {
+                'wheel_speed': 'Distance distribution of wheel speed',
+                'engine_rpm': 'Distance distribution of engine RPM',
+                'gear_position': 'Distance distribution of gear position'
+            }.get(field, field)
+
+            xaxes_title = {
+                'wheel_speed': 'Wheel speed (Km/h)',
+                'engine_rpm': 'Engine RPM',
+                'gear_position': 'Gear position'
+            }.get(field, field)
+
+            step = {
+                'wheel_speed': 20,
+                'engine_rpm': 1000,
+                'gear_position': 1
+            }.get(field, 20)
+            
+            row_data = self._distance_dist(field, step)
+        
+            data = [(s[0], d) for (s, d) in row_data]
+            
+            df = DataFrame(data, columns=[field, 'distance'])
+                
+            fig = px.area(df, x=field, y='distance')
+
+            title = f"{title}, {' '.join(self.title.split())}"
+
+            fig.update_layout(title=title)
+
+            base_kargs = dict(showgrid=True, gridwidth=1,
+                gridcolor='LightPink',
+                minor=dict(ticklen=0, tickcolor="black", showgrid=True))
+                
+            fig.update_xaxes(title=xaxes_title, **base_kargs)           
+            fig.update_yaxes(title='Distance (Km)', **base_kargs)
+            tickvals = [s[0] for (s, d) in row_data]
+            if field=='gear_position':
+                tickvals=[0, 1, 2, 3, 4, 5, 6]
+                ticktext=['N', '1st', '2nd', '3rd', '4th', '5th', '6th']
+            else:
+                fig.update_xaxes(tickangle=60)           
+                ticktext = [f"{s[0]}~{s[1]}" for (s, d) in row_data]
+            fig.update_xaxes(tickvals=tickvals, ticktext=ticktext)
+
+            max_y = df.loc[df['distance'].idxmax()]['distance']
+            max_x = df.loc[df['distance'].idxmax()][field]
+
+            fig.add_annotation(
+                text=f"{max_y:.2f} Km",
+                x=max_x, y=max_y*1.01,
+                arrowhead=1, showarrow=True
+            )
+
+            max_y = df.loc[df.last_valid_index()]['distance']
+            max_x = df.loc[df.last_valid_index()][field]
+
+            fig.add_annotation(
+                text=f"{max_y:.2f} Km",
+                x=max_x, y=max_y*1.01,
+                arrowhead=1, showarrow=True
+            )
+
+            image_filename = filename.with_name(
+                    f"{basename}_dd_{field}").with_suffix('.jpg')
+
+            if not silent:
+                print(f"Make file {repr(str(image_filename))}...", end="")
+                
+            fig.write_image(image_filename, width=800, height=350)
+
+            if not silent:
+                print(" Ok")
+
         def get_values(table):
             values = []
             if table:
@@ -691,6 +811,9 @@ Max for each gear
  ![Time distribution of wheel speed graph]({basename}_td_wheel_speed.jpg)
  ![Time distribution of engine rpm graph]({basename}_td_engine_rpm.jpg)
  ![Time distribution of gear position graph]({basename}_td_gear_position.jpg)
+ ![Distance distribution of wheel speed graph]({basename}_dd_wheel_speed.jpg)
+ ![Distance distribution of engine rpm graph]({basename}_dd_engine_rpm.jpg)
+ ![Distance distribution of gear position graph]({basename}_dd_gear_position.jpg)
 
 """
         report_filename = filename.with_name(
@@ -796,16 +919,15 @@ Max for each gear
         gpxfile.name = self.title + postitle
         gpxfile.desc = gpxfile.name
         km = 0
-        prev_latitude = self.table[0]['gps_latitude']
-        prev_longitude = self.table[0]['gps_longitude']
+        prev_coor = Coordinate(
+            self.table[0]['gps_latitude'],
+            self.table[0]['gps_longitude'])
         m = None
         for r in self.table:
             if m is None or m['wheel_speed']<r['wheel_speed']:
                 m = r
-            latitude, longitude = r['gps_latitude'], r['gps_longitude']
-            delta_latitude = abs(latitude - prev_latitude)
-            delta_longitude = abs(longitude - prev_longitude)
-            km += ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
+            coor = Coordinate(r['gps_latitude'], r['gps_longitude'])
+            km += prev_coor.km_to(coor)
             if km>=chunk:
                 km=0
                 name = f"{m['wheel_speed']} km/h"
@@ -813,5 +935,5 @@ Max for each gear
                 args = [m[k] for k in ['gps_latitude', 'gps_longitude']] + [name] + [desc]
                 gpxfile.add_way_point(*args)
                 m = None
-            prev_latitude, prev_longitude = latitude, longitude
+            prev_coor = coor
         return gpxfile
