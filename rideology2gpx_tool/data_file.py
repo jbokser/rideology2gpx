@@ -66,7 +66,7 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
     @property
     def sexagesimal(self):
         
-        lat_symbol = 'M' if self.latitude>0 else 'S'
+        lat_symbol = 'N' if self.latitude>0 else 'S'
         long_symbol = 'W' if self.longitude>0 else 'E'
         
         lat = dec_to_sexagesimal(self.latitude)
