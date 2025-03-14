@@ -1,4 +1,5 @@
 import plotly.express as px
+from math import radians, degrees, sin, cos, atan2
 from plotly.graph_objects import Figure, Table
 from pathlib import Path
 from datetime import timedelta
@@ -22,25 +23,54 @@ def td_to_str(td: timedelta) -> str:
     str = ' '.join(l)
     return str
 
+def dec_to_sexagesimal(d) -> str:
+    S = lambda x: (abs(x)%1)*60
+    g = abs(int(d))
+    m = int(S(d))
+    s = S(S(d))
+    return f"{g:03}°{m:02}′{int(s):02}.{int(s%1*100):02}″"
+
+
+class Course():
+
+    _cardinals_list = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
+
+    @property
+    def value(self) -> float:
+        return self._value
+    
+    @value.setter
+    def value(self, value: float):
+        value = (float(value) + 360) % 360
+        self._value = value
+
+    def __init__(self, value: float):
+        self.value = value
+
+    @property
+    def cardinal(self) -> float:
+        m = (len(self._cardinals_list)-1)
+        return self._cardinals_list[round(self.value / (360/m)) % m]
+
+    def __str__(self) -> str:
+        return f"{self.cardinal} ({int(self.value)}°)"  
+
+    def __format__(self, format_spec) -> str:
+        if not format_spec:
+            return str(self)
+        return f"{self.value:{format_spec}}"
+
 
 class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
-
-    @staticmethod
-    def _dec_to_sexagesimal(d):
-        S = lambda x: (abs(x)%1)*60
-        g = abs(int(d))
-        m = int(S(d))
-        s = S(S(d))
-        return f"{g:03}°{m:02}′{int(s):02}.{int(s%1*100):02}″"
-    
+   
     @property
     def sexagesimal(self):
         
         lat_symbol = 'M' if self.latitude>0 else 'S'
         long_symbol = 'W' if self.longitude>0 else 'E'
         
-        lat = self._dec_to_sexagesimal(self.latitude)
-        long = self._dec_to_sexagesimal(self.longitude)
+        lat = dec_to_sexagesimal(self.latitude)
+        long = dec_to_sexagesimal(self.longitude)
         
         return f"{lat_symbol}{lat} {long_symbol}{long}"
     
@@ -54,6 +84,28 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
         delta_longitude = abs(coor.longitude - self.longitude)
         km = ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
         return km
+
+
+    def course(self, coor) -> float:
+        if not isinstance(coor, Coordinate):
+            raise TypeError("coor must be a Coordinate instance")
+        
+        lat1, lon1, lat2, lon2 = map(radians, [
+            self.latitude, -self.longitude, coor.latitude, -coor.longitude])
+    
+        delta_lon = lon2 - lon1
+        
+        x = sin(delta_lon) * cos(lat2)
+        y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(delta_lon)
+        
+        course = degrees(atan2(x, y))
+    
+        return Course(course)
+
+
+
+
+
 
 
 class DataFile():
@@ -291,9 +343,21 @@ class DataFile():
         if tablefmt=='plain':
             F = lambda x: f"{x}:"
 
-        table.append([F('Max engine speed'), f"{self.max_engine_rpm} rpm"])
-        table.append([F('Max wheel speed'), f"{self.max_wheel_speed} km/h"])
-        table.append([F('Max water temp'), f"{self.max_water_temperature} °C"])
+        for caption, data, unit, field in [
+                ('Max engine speed', self.max_engine_rpm, 'rpm',
+                 'engine_rpm'),
+                ('Max wheel speed', self.max_wheel_speed, 'km/h',
+                 'wheel_speed'),
+                ('Max water temp', self.max_water_temperature, '°C',
+                 'water_temperature')
+            ]:
+            td_str = ''.join(td_to_str(self._time_above(field, data)).split())
+            dd = self._distance_above(field, data)
+            dd_unit = 'Km'
+            if dd<1:
+                dd *= 1000
+                dd_unit = 'm'
+            table.append([F(caption), f"{data} {unit} (for {td_str} or {int(dd)}{dd_unit})"])
 
         if self.avg_idle_speed:
             table.append([F('Avg idle speed'), f"{self.avg_idle_speed} rpm"])
@@ -302,7 +366,8 @@ class DataFile():
             table.append([F('Avg speed'), f"{self.avg_speed} km/h"])
         
         table.append([F('Total time'), f"{self._timedelta_str(self.elapsed_time)}"])
-        table.append([F('Distance'), f"{self.distance:.2f} km"])
+        table.append([F('Distance'), f"{self.distance:.2f} km ({self.start.km_to(self.end):.2f} km straight)"])       
+        table.append([F('Course'), f"{self.start.course(self.end)}"])
         table.append([F('Starting point'), str(self.start)])
         table.append([F('Ending point'), str(self.end)])
 
