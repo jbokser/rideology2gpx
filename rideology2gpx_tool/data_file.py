@@ -85,7 +85,6 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
         km = ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
         return km
 
-
     def course(self, coor) -> float:
         if not isinstance(coor, Coordinate):
             raise TypeError("coor must be a Coordinate instance")
@@ -101,11 +100,6 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
         course = degrees(atan2(x, y))
     
         return Course(course)
-
-
-
-
-
 
 
 class DataFile():
