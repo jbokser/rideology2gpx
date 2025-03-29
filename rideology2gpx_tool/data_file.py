@@ -33,7 +33,7 @@ def dec_to_sexagesimal(d) -> str:
 
 class Course():
 
-    _cardinals_list = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
+    _cardinals_list = ["N", "NW", "W", "SW", "S", "SE", "E", "NE", "N"]
 
     @property
     def value(self) -> float:
