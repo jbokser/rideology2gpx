@@ -80,6 +80,8 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
     def km_to(self, coor) -> float:
         if not isinstance(coor, Coordinate):
             raise TypeError("coor must be a Coordinate instance")
+        if coor == self:
+            return 0.0        
         delta_latitude = abs(coor.latitude - self.latitude)
         delta_longitude = abs(coor.longitude - self.longitude)
         km = ((delta_latitude**2 + delta_longitude**2)**0.5) * 111.321
@@ -88,7 +90,10 @@ class Coordinate(namedtuple('Coordinate', ('latitude', 'longitude'))):
     def course(self, coor) -> float:
         if not isinstance(coor, Coordinate):
             raise TypeError("coor must be a Coordinate instance")
-        
+
+        if coor == self:
+            return None
+
         lat1, lon1, lat2, lon2 = map(radians, [
             self.latitude, -self.longitude, coor.latitude, -coor.longitude])
     
@@ -150,19 +155,34 @@ class DataFile():
                         'lean_angle', 'rideology_score']
             
             formulas = {
-                'elapsed_time': lambda d: timedelta(
-                    seconds=float(int(d['elapsed_msec']))/1000),
-                'gps_latitude': lambda d: float(d['gps_latitude']),
-                'gps_longitude': lambda d: float(d['gps_longitude']),
-                'water_temperature': lambda d: int(
-                    float(d['water_temperature'])),
-                'engine_rpm': lambda d: int(float(d['engine_rpm'])),
-                'wheel_speed': lambda d: int(float(d['wheel_speed'])),
-                'gear_position': lambda d: str(d['gear_position'])
+                'elapsed_time': lambda d, r, l: timedelta(seconds=float(int(d[
+                    'elapsed_msec']))/1000),
+                'gps_latitude': lambda d, r, l: float(d['gps_latitude']),
+                'gps_longitude': lambda d, r, l: float(d['gps_longitude']),
+                'water_temperature': lambda d, r, l: int(float(d[
+                    'water_temperature'])),
+                'engine_rpm': lambda d, r, l: int(float(d['engine_rpm'])),
+                'wheel_speed': lambda d, r, l: int(float(d['wheel_speed'])),
+                'gear_position': lambda d, r, l: str(d['gear_position']),
+                'coordinate': lambda d, r, l: Coordinate(r['gps_latitude'], r[
+                    'gps_longitude']),
+                'last_coordinate': lambda d, r, l: l['coordinate'],
+                'delta_distance': lambda d, r, l: r['last_coordinate'].km_to(
+                    r['coordinate'])*1000.0,
+                'delta_time': lambda d, r, l: r['elapsed_time'] - l[
+                    'elapsed_time'],
+                'course': lambda d, r, l: r['last_coordinate'].course(r[
+                    'coordinate']),
+                'gps_speed': lambda d, r, l: 3.6 * r['delta_distance'] / r[
+                    'delta_time'].total_seconds() if r['delta_time'
+                        ].total_seconds() else 0.0,
+                'distance': lambda d, r, l: l.get('distance', 0.0) + (
+                    r['delta_distance']/1000),
             }
 
             self._table = []
             i=0
+            last_row = None
             for line in str(self).split('\n'):
                 line_list = [f.strip() for f in line.split(sep)]
                 if len(line_list)==len(all_names) and \
@@ -171,8 +191,11 @@ class DataFile():
                     i+=1
                     row = {'index': i}
                     for name in formulas.keys():
-                        row[name] = formulas[name](full_data)
+                        row[name] = formulas[name](
+                            full_data,row,
+                            row if last_row is None else last_row)
                     self._table.append(row)
+                    last_row = row
 
         return self._table
     
