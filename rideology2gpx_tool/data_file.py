@@ -601,7 +601,7 @@ Max for each gear
             start_time = datetime.now()
 
         columns = ['Time', 'Latitude', 'Longitude', 'Water temperature',
-                   'Engine RPM', 'Wheel speed', 'Gear position']
+                   'Engine RPM', 'Wheel speed', 'Gear position', 'Distance']
         keys = {
             'Time': 'elapsed_time',
             'Latitude': 'gps_latitude',
@@ -609,7 +609,8 @@ Max for each gear
             'Water temperature': 'water_temperature',
             'Engine RPM': 'engine_rpm',
             'Wheel speed': 'wheel_speed',
-            'Gear position': 'gear_position'
+            'Gear position': 'gear_position',
+            'Distance': 'distance'
         }
 
         transform = {
@@ -629,7 +630,8 @@ Max for each gear
             df.loc[i+1] = Series(row)
 
         for field in ['Latitude', 'Longitude', 'Water temperature',
-                      'Engine RPM', 'Wheel speed', 'Gear position']:
+                      'Engine RPM', 'Wheel speed', 'Gear position',
+                      'Distance']:
             df[field] = to_numeric(df[field])
 
         return df
@@ -654,11 +656,14 @@ Max for each gear
             ]:
 
             posname = "_".join([''] + field.strip().split()).lower()
-            title = f"{field}, {' '.join(self.title.split())}"
+            title = f"{field} vs. time, {' '.join(self.title.split())}"
+            title_d = f"{field} vs. distance, {' '.join(self.title.split())}"
             
             df = self.data_frame(start_time=start_time)
             
             fig = px.area(df, x='Time', y=field)
+            fig_d = px.area(df, x='Distance', y=field)
+            
             
             base_kargs = dict(showgrid=True, gridwidth=1,
                               gridcolor='LightPink',
@@ -667,8 +672,12 @@ Max for each gear
             
             fig.update_xaxes(title=None, tickformat="%H:%M:%S",
                              tickangle=30, **base_kargs)
+
+            fig_d.update_xaxes(title='Km', **base_kargs)
             
             fig.update_yaxes(title=unit, **base_kargs)
+
+            fig_d.update_yaxes(title=unit, **base_kargs)
 
             if field=="Gear position":
                 fig.update_yaxes(tickvals=[0,1,2,3,4,5,6], ticktext=[
@@ -684,16 +693,26 @@ Max for each gear
                 
                 max_y = df.loc[df[field].idxmax()][field]
                 max_x = df.loc[df[field].idxmax()]['Time']
+                max_x_d = df.loc[df[field].idxmax()]['Distance']
 
                 fig.add_annotation(
                     text=f"Max {max_y} {unit}", x=max_x, y=max_y*1.01,
                     arrowhead=1, showarrow=True
                 )
 
+                fig_d.add_annotation(
+                    text=f"Max {max_y} {unit}", x=max_x_d, y=max_y*1.01,
+                    arrowhead=1, showarrow=True
+                )
+
             fig.update_layout(title=title)
+            fig_d.update_layout(title=title_d)
 
             image_filename = filename.with_name(
-                f"{basename}{posname}").with_suffix('.jpg')
+                f"{basename}{posname}_vs_time").with_suffix('.jpg')
+
+            image_filename_d = filename.with_name(
+                f"{basename}{posname}_vs_distance").with_suffix('.jpg')
 
             if not silent:
                 print(f"Make file {repr(str(image_filename))}...", end="")
@@ -702,6 +721,13 @@ Max for each gear
 
             if not silent:
                 print(" Ok")
+                print(f"Make file {repr(str(image_filename_d))}...", end="")
+            
+            fig_d.write_image(image_filename_d, width=800, height=350)
+
+            if not silent:
+                print(" Ok")
+
 
         #
         # For time distribution graph uncommnet this code
@@ -939,9 +965,12 @@ Max for each gear
 
 ## Graphics
 
- ![Wheel speed graph]({basename}_wheel_speed.jpg)
- ![Engine rpm graph]({basename}_engine_rpm.jpg)
- ![Gear position graph]({basename}_gear_position.jpg)
+ ![Wheel speed vs. time graph]({basename}_wheel_speed_vs_time.jpg)
+ ![Engine rpm vs. time graph]({basename}_engine_rpm_vs_time.jpg)
+ ![Gear position vs. time graph]({basename}_gear_position_vs_time.jpg)
+ ![Wheel speed vs. distance graph]({basename}_wheel_speed_vs_distance.jpg)
+ ![Engine rpm vs. distance graph]({basename}_engine_rpm_vs_distance.jpg)
+ ![Gear position vs. distance graph]({basename}_gear_position_vs_distance.jpg)
  ![Distance distribution of wheel speed graph]({basename}_dd_wheel_speed.jpg)
  ![Distance distribution of engine rpm graph]({basename}_dd_engine_rpm.jpg)
  ![Distance distribution of gear position graph]({basename}_dd_gear_position.jpg)
