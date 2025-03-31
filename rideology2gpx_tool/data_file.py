@@ -454,7 +454,7 @@ class DataFile():
                 except ValueError:
                     value = 0
             last_elapsed_time = l['elapsed_time'] 
-            if threshold>0:
+            if threshold>=0:
                 if value>=threshold:
                     time += delta
             else:
@@ -496,7 +496,7 @@ class DataFile():
                 except ValueError:
                     value = 0
             prev_coor = coor
-            if threshold>0:
+            if threshold>=0:
                 if value>=threshold:
                     km += delta
             else:
