@@ -10,6 +10,8 @@ from pandas import DataFrame, Series, to_numeric
 from .gpx_file import GpxFile
 
 
+G = 9.81
+
 def td_to_str(td: timedelta) -> str:
     h, r = divmod(td.seconds, 3600)
     m, s = divmod(r, 60)
@@ -178,6 +180,14 @@ class DataFile():
                         ].total_seconds() else 0.0,
                 'distance': lambda d, r, l: l.get('distance', 0.0) + (
                     r['delta_distance']/1000),
+                'wheel_acceleration': lambda d, r, l: (((r.get('wheel_speed',
+                    0.0) - l.get('wheel_speed', 0.0))/3.6)/r['delta_time'
+                    ].total_seconds() if r['delta_time'].total_seconds(
+                    ) else 0.0)/G,
+                'gps_acceleration': lambda d, r, l: (((r.get('gps_speed',
+                    0.0) - l.get('gps_speed', 0.0))/3.6)/r['delta_time'
+                    ].total_seconds() if r['delta_time'].total_seconds(
+                    ) else 0.0)/G,
             }
 
             self._table = []
@@ -249,6 +259,14 @@ class DataFile():
     @property
     def max_wheel_speed(self):
         return max([r['wheel_speed'] for r in self.table ])
+
+    @property
+    def max_wheel_acceleration(self):
+        return max([r['wheel_acceleration'] for r in self.table ])
+
+    @property
+    def max_wheel_brake(self):
+        return min([r['wheel_acceleration'] for r in self.table ])
 
     @property
     def max_water_temperature(self):
@@ -365,6 +383,10 @@ class DataFile():
                  'engine_rpm'),
                 ('Max wheel speed', self.max_wheel_speed, 'km/h',
                  'wheel_speed'),
+                ('Max acceleration', self.max_wheel_acceleration, 'g',
+                 'wheel_acceleration'),
+                ('Max brake', self.max_wheel_brake, 'g',
+                 'wheel_acceleration'),
                 ('Max water temp', self.max_water_temperature, '°C',
                  'water_temperature')
             ]:
@@ -374,7 +396,8 @@ class DataFile():
             if dd<1:
                 dd *= 1000
                 dd_unit = 'm'
-            table.append([F(caption), f"{data} {unit} (for {td_str} or {int(dd)}{dd_unit})"])
+            str_data = f"{abs(data)}" if type(data) is int else f"{abs(data):.2f}"
+            table.append([F(caption), f"{str_data} {unit} (for {td_str} or {int(dd)}{dd_unit})"])
 
         if self.avg_idle_speed:
             table.append([F('Avg idle speed'), f"{self.avg_idle_speed} rpm"])
@@ -411,10 +434,13 @@ class DataFile():
                     value = int(value)
                 except ValueError:
                     value = 0
-            last_elapsed_time = l['elapsed_time']
-            
-            if value>=threshold:
-                time += delta
+            last_elapsed_time = l['elapsed_time'] 
+            if threshold>0:
+                if value>=threshold:
+                    time += delta
+            else:
+                if value<=threshold:
+                    time += delta
         return time
     
     def _time_dist(self, field='wheel_speed', step=20):
@@ -451,8 +477,12 @@ class DataFile():
                 except ValueError:
                     value = 0
             prev_coor = coor
-            if value>=threshold:
-                km += delta
+            if threshold>0:
+                if value>=threshold:
+                    km += delta
+            else:
+                if value<=threshold:
+                    km += delta
         return km
     
     def _distance_dist(self, field='wheel_speed', step=20):
