@@ -888,7 +888,7 @@ Max for each gear
         if not silent:
             print(f"Make file {repr(str(image_filename))}...", end="")
         
-        fig.write_image(image_filename, width=500, height=450)
+        fig.write_image(image_filename, width=500, height=500)
 
         if not silent:
             print(" Ok")
