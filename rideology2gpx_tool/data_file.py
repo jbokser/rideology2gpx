@@ -55,7 +55,7 @@ class Course():
         return self._cardinals_list[round(self.value / (360/m)) % m]
 
     def __str__(self) -> str:
-        return f"{self.cardinal} ({int(self.value)}°)"  
+        return f"{self.cardinal} {int(self.value)}°"  
 
     def __format__(self, format_spec) -> str:
         if not format_spec:
@@ -602,7 +602,7 @@ Max for each gear
 
         columns = ['Time', 'Latitude', 'Longitude', 'Water temperature',
                    'Engine RPM', 'Wheel speed', 'Gear position', 'Distance',
-                   'Acceleration']
+                   'Acceleration', 'Course']
         keys = {
             'Time': 'elapsed_time',
             'Latitude': 'gps_latitude',
@@ -613,11 +613,13 @@ Max for each gear
             'Gear position': 'gear_position',
             'Distance': 'distance',
             'Acceleration': 'wheel_acceleration',
+            'Course': 'course',        
         }
 
         transform = {
             'elapsed_time': lambda x: x + start_time,
             'gear_position': lambda x: (0 if x=='N' else int(x)),
+            'course': lambda x: x.value if x is not None else None,
             'default': lambda x: x
         }
 
@@ -633,7 +635,7 @@ Max for each gear
 
         for field in ['Latitude', 'Longitude', 'Water temperature',
                       'Engine RPM', 'Wheel speed', 'Gear position',
-                      'Distance', 'Acceleration']:
+                      'Distance', 'Acceleration', 'Course']:
             df[field] = to_numeric(df[field])
 
         return df
@@ -656,6 +658,7 @@ Max for each gear
                 ("Engine RPM", "rpm"),
                 ("Gear position", "Gear"),
                 ("Acceleration", "g"),              
+                ("Course", ""),              
             ]:
 
             posname = "_".join([''] + field.strip().split()).lower()
@@ -664,12 +667,18 @@ Max for each gear
             
             df = self.data_frame(start_time=start_time)
             
-            fig = px.area(df, x='Time', y=field)
-            fig_d = px.area(df, x='Distance', y=field)
+            if field in ['Course', 'Acceleration']:
+                df = df.dropna(subset=[field]) # remove NaN
+                df = df[df[field] != 0] 
+            
+            p = px.line if field in ['Course', 'Acceleration'] else px.area
+            fig = p(df, x='Time', y=field)
+            fig_d = p(df, x='Distance', y=field)
             
             base_kargs = dict(showgrid=True, gridwidth=1,
                               gridcolor='LightPink',
-                minor=dict(ticklen=6 if field!="Gear position" else 0,
+                minor=dict(ticklen=0 if field in ["Gear position",
+                                                  "Course"] else 6,
                            tickcolor="black", showgrid=True))
             
             fig.update_xaxes(title=None, tickformat="%H:%M:%S",
@@ -690,6 +699,22 @@ Max for each gear
                     '4th  ',
                     '5th  ',
                     '6th  '])
+                fig_d.update_yaxes(tickvals=[0,1,2,3,4,5,6], ticktext=[
+                    ' N   ', 
+                    '1st  ',
+                    '2nd  ',
+                    '3rd  ',
+                    '4th  ',
+                    '5th  ',
+                    '6th  '])
+
+            if field=="Course":
+                fig.update_yaxes(tickvals=[x for x in range(0, 361, 45)],
+                                 ticktext=[str(Course(x)) for x in range(
+                                     0, 361, 45)])
+                fig_d.update_yaxes(tickvals=[x for x in range(0, 361, 45)],
+                                   ticktext=[str(Course(x)) for x in range(
+                                       0, 361, 45)])
 
             if field in ["Wheel speed", "Engine RPM", "Acceleration"]:
                 
@@ -753,7 +778,6 @@ Max for each gear
 
             if not silent:
                 print(" Ok")
-
 
         #
         # For time distribution graph uncommnet this code
@@ -995,10 +1019,12 @@ Max for each gear
  ![Acceleration vs. time graph]({basename}_acceleration_vs_time.jpg)
  ![Engine rpm vs. time graph]({basename}_engine_rpm_vs_time.jpg)
  ![Gear position vs. time graph]({basename}_gear_position_vs_time.jpg)
+ ![Course vs. time graph]({basename}_course_vs_time.jpg)
  ![Wheel speed vs. distance graph]({basename}_wheel_speed_vs_distance.jpg)
  ![Acceleration vs. distance graph]({basename}_acceleration_vs_distance.jpg)
  ![Engine rpm vs. distance graph]({basename}_engine_rpm_vs_distance.jpg)
  ![Gear position vs. distance graph]({basename}_gear_position_vs_distance.jpg)
+ ![Course vs. distance graph]({basename}_course_vs_distance.jpg)
  ![Distance distribution of wheel speed graph]({basename}_dd_wheel_speed.jpg)
  ![Distance distribution of engine rpm graph]({basename}_dd_engine_rpm.jpg)
  ![Distance distribution of gear position graph]({basename}_dd_gear_position.jpg)
