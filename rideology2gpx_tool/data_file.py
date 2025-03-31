@@ -231,8 +231,20 @@ class DataFile():
         self._title = value
 
     @staticmethod
-    def _lst_avg(lst): 
-        return sum(lst) / len(lst)
+    def _lst_avg(numbers: list) -> float: 
+        return sum(numbers) / len(numbers)
+
+    @staticmethod
+    def _lst_median(numbers: list) -> float:
+        """Returns the median of a list of numbers."""
+        numbers.sort()
+        length = len(numbers)
+        middle = length // 2
+        
+        if length % 2 == 0:
+            return (numbers[middle - 1] + numbers[middle]) / 2
+        else:
+            return numbers[middle]
 
     @staticmethod
     def _timedelta_str(td):
@@ -357,6 +369,10 @@ class DataFile():
             return None
 
     @property
+    def mediam_speed(self):
+        return int(self._lst_median([r['wheel_speed'] for r in self.table if r['wheel_speed']]))
+
+    @property
     def max_for_each_gear(self):
         out = []
         engine_rpm = self.max_engine_rpm_for_each_gear
@@ -404,7 +420,10 @@ class DataFile():
 
         if self.avg_speed:
             table.append([F('Avg speed'), f"{self.avg_speed} km/h"])
-        
+
+        if self.mediam_speed:
+            table.append([F('Mediam speed'), f"{self.mediam_speed} km/h"])
+
         table.append([F('Total time'), f"{self._timedelta_str(self.elapsed_time)}"])
         table.append([F('Distance'), f"{self.distance:.2f} km ({self.start.km_to(self.end):.2f} km straight)"])       
         table.append([F('Course'), f"{self.start.course(self.end)}"])
