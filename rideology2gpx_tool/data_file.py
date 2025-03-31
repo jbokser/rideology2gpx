@@ -601,7 +601,8 @@ Max for each gear
             start_time = datetime.now()
 
         columns = ['Time', 'Latitude', 'Longitude', 'Water temperature',
-                   'Engine RPM', 'Wheel speed', 'Gear position', 'Distance']
+                   'Engine RPM', 'Wheel speed', 'Gear position', 'Distance',
+                   'Acceleration']
         keys = {
             'Time': 'elapsed_time',
             'Latitude': 'gps_latitude',
@@ -610,7 +611,8 @@ Max for each gear
             'Engine RPM': 'engine_rpm',
             'Wheel speed': 'wheel_speed',
             'Gear position': 'gear_position',
-            'Distance': 'distance'
+            'Distance': 'distance',
+            'Acceleration': 'wheel_acceleration',
         }
 
         transform = {
@@ -631,7 +633,7 @@ Max for each gear
 
         for field in ['Latitude', 'Longitude', 'Water temperature',
                       'Engine RPM', 'Wheel speed', 'Gear position',
-                      'Distance']:
+                      'Distance', 'Acceleration']:
             df[field] = to_numeric(df[field])
 
         return df
@@ -652,7 +654,8 @@ Max for each gear
         for field, unit in [
                 ("Wheel speed", "km/h"),
                 ("Engine RPM", "rpm"),
-                ("Gear position", "Gear")
+                ("Gear position", "Gear"),
+                ("Acceleration", "g"),              
             ]:
 
             posname = "_".join([''] + field.strip().split()).lower()
@@ -663,7 +666,6 @@ Max for each gear
             
             fig = px.area(df, x='Time', y=field)
             fig_d = px.area(df, x='Distance', y=field)
-            
             
             base_kargs = dict(showgrid=True, gridwidth=1,
                               gridcolor='LightPink',
@@ -689,19 +691,43 @@ Max for each gear
                     '5th  ',
                     '6th  '])
 
-            if field in ["Wheel speed", "Engine RPM"]:
+            if field in ["Wheel speed", "Engine RPM", "Acceleration"]:
                 
                 max_y = df.loc[df[field].idxmax()][field]
                 max_x = df.loc[df[field].idxmax()]['Time']
                 max_x_d = df.loc[df[field].idxmax()]['Distance']
 
+                str_max_y = (f"Max {max_y:.02f} {unit}"
+                             if isinstance(max_y, float) else
+                             f"Max {max_y} {unit}")
+
                 fig.add_annotation(
-                    text=f"Max {max_y} {unit}", x=max_x, y=max_y*1.01,
+                    text=str_max_y, x=max_x, y=max_y*1.01,
                     arrowhead=1, showarrow=True
                 )
 
                 fig_d.add_annotation(
-                    text=f"Max {max_y} {unit}", x=max_x_d, y=max_y*1.01,
+                    text=str_max_y, x=max_x_d, y=max_y*1.01,
+                    arrowhead=1, showarrow=True
+                )
+
+            if field in ["Acceleration"]:
+                
+                min_y = df.loc[df[field].idxmin()][field]
+                min_x = df.loc[df[field].idxmin()]['Time']
+                min_x_d = df.loc[df[field].idxmin()]['Distance']
+
+                str_min_y = (f"Min {min_y:.02f} {unit}"
+                             if isinstance(min_y, float) else
+                             f"Min {min_y} {unit}")
+
+                fig.add_annotation(
+                    text=str_min_y, x=min_x, y=min_y*1.01,
+                    arrowhead=1, showarrow=True
+                )
+
+                fig_d.add_annotation(
+                    text=str_min_y, x=min_x_d, y=min_y*1.01,
                     arrowhead=1, showarrow=True
                 )
 
@@ -966,9 +992,11 @@ Max for each gear
 ## Graphics
 
  ![Wheel speed vs. time graph]({basename}_wheel_speed_vs_time.jpg)
+ ![Acceleration vs. time graph]({basename}_acceleration_vs_time.jpg)
  ![Engine rpm vs. time graph]({basename}_engine_rpm_vs_time.jpg)
  ![Gear position vs. time graph]({basename}_gear_position_vs_time.jpg)
  ![Wheel speed vs. distance graph]({basename}_wheel_speed_vs_distance.jpg)
+ ![Acceleration vs. distance graph]({basename}_acceleration_vs_distance.jpg)
  ![Engine rpm vs. distance graph]({basename}_engine_rpm_vs_distance.jpg)
  ![Gear position vs. distance graph]({basename}_gear_position_vs_distance.jpg)
  ![Distance distribution of wheel speed graph]({basename}_dd_wheel_speed.jpg)
