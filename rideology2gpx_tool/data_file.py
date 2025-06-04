@@ -780,7 +780,9 @@ Max for each gear
                 print(" Ok")
 
         #
-        # For time distribution graph uncommnet this code
+        # Uncomment the block below if you also want to generate
+        # time‑distribution graphs for gear position, engine RPM
+        # and wheel speed.
         #
         # for field in ['gear_position', 'engine_rpm', 'wheel_speed']:
         #
