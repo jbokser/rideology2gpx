@@ -162,7 +162,7 @@ class DataFile():
                     'water_temperature'])),
                 'engine_rpm': lambda d, r, l: int(float(d['engine_rpm'])),
                 'wheel_speed': lambda d, r, l: int(float(d['wheel_speed'])),
-                'gear_position': lambda d, r, l: str(d['gear_position']),
+                'gear_position': lambda d, r, l: str(d['gear_position']).upper(),
                 'coordinate': lambda d, r, l: Coordinate(r['gps_latitude'], r[
                     'gps_longitude']),
                 'last_coordinate': lambda d, r, l: l['coordinate'],
@@ -624,7 +624,7 @@ Max for each gear
 
         transform = {
             'elapsed_time': lambda x: x + start_time,
-            'gear_position': lambda x: (0 if x=='N' else int(x)),
+            'gear_position': lambda x: (0 if x in ['N', 'n'] else int(x)),
             'course': lambda x: x.value if x is not None else None,
             'default': lambda x: x
         }
