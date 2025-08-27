@@ -4,9 +4,9 @@ A simple command line program to transform log files obtained with the *Kawasaki
 
 ![](images/logo.jpg)
 
-## Refrences
+## References
 
-* [Source code in Github](https://github.com/jbokser/rideology2gpx)
+* [Source code in GitHub](https://github.com/jbokser/rideology2gpx)
 * [Package from Python package index (PyPI)](https://pypi.org/project/rideology2gpx)
 
 
@@ -33,7 +33,7 @@ $ pip3 install rideology2gpx
 
 ### From source
 
-Download from [Github](https://github.com/jbokser/rideology2gpx)
+Download from [GitHub](https://github.com/jbokser/rideology2gpx)
 
 Standing inside the folder, run:
 
