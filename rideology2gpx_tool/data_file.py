@@ -148,14 +148,11 @@ class DataFile():
 
             sep = ','
 
-            all_names = ['elapsed_msec', 'gps_latitude', 'gps_longitude',
+            base_names = ['elapsed_msec', 'gps_latitude', 'gps_longitude',
                         'instant_fuel_consumption', 'water_temperature',
-                        'boost_temperature', 'engine_rpm', 'wheel_speed',
-                        'acceleration', 'throttle_position',
-                        'accel_grip_position', 'boost_pressure',
-                        'gear_position', 'brake_pressure_fr_caliper',
-                        'lean_angle', 'rideology_score']
-            
+                        'engine_rpm', 'wheel_speed',
+                        'acceleration', 'throttle_position']    
+
             formulas = {
                 'elapsed_time': lambda d, r, l: timedelta(seconds=float(int(d[
                     'elapsed_msec']))/1000),
@@ -193,10 +190,19 @@ class DataFile():
             self._table = []
             i=0
             last_row = None
+            all_names = []
             for line in str(self).split('\n'):
-                line_list = [f.strip() for f in line.split(sep)]
-                if len(line_list)==len(all_names) and \
-                        line_list[0].replace('"', '')!=all_names[0]:
+                line_list = [x.strip().replace('"', ''
+                    ).split('(')[0].lower() for x in line.split(sep)]
+                
+                if not(bool(set(base_names)-set(line_list))):
+                    all_names = [x for x in line_list]
+                    continue
+                
+                if not all_names:
+                    continue
+
+                if len(line_list)==len(all_names):
                     full_data = dict(zip(all_names, line_list))
                     i+=1
                     row = {'index': i}
