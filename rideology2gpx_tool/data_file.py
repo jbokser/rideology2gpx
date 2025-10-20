@@ -124,7 +124,7 @@ class DataFile():
     def __str__(self):
         if self._text is None:
             def file_to_text():
-                for encoding in ['utf-8', 'windows-1252']:
+                for encoding in ['utf-8', 'windows-1252', 'latin-1']:
                     file = open(self._filename, "r", encoding=encoding)
                     out = ""
                     error = None
