@@ -6,7 +6,7 @@ from datetime import timedelta
 from datetime import datetime
 from tabulate import tabulate
 from collections import namedtuple
-from pandas import DataFrame, Series, to_numeric
+from pandas import DataFrame, to_numeric
 from .gpx_file import GpxFile
 
 
@@ -124,8 +124,12 @@ class DataFile():
     def __str__(self):
         if self._text is None:
             def file_to_text():
-                for encoding in ['utf-8', 'windows-1252', 'latin-1']:
-                    file = open(self._filename, "r", encoding=encoding)
+                for encoding in [
+                        {'encoding': 'utf-8'},
+                        {'encoding': 'windows-1252'},
+                        {'encoding': 'windows-1252', 'errors': 'replace'},
+                    ]:
+                    file = open(self._filename, "r", **encoding)
                     out = ""
                     error = None
                     try:
@@ -629,15 +633,17 @@ Max for each gear
             'default': lambda x: x
         }
 
-        df = DataFrame(columns=columns)
-        
-        for i, r in enumerate(self.table):
+        rows = []
+
+        for r in self.table:
             row = {}
             for c in columns:
                 k = keys[c]
                 fnc = transform.get(k, transform.get('default', lambda x: x))
                 row[c] = fnc(r[k])
-            df.loc[i+1] = Series(row)
+            rows.append(row)
+
+        df = DataFrame(rows, columns=columns)
 
         for field in ['Latitude', 'Longitude', 'Water temperature',
                       'Engine RPM', 'Wheel speed', 'Gear position',
