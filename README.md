@@ -1,12 +1,14 @@
 # **$ rideology2gpx**
 
+> **Notice:** This repository will be **ARCHIVED**. The replacement for this application is available at [rideology2gpx 2.0](https://github.com/jbokser/rideology2gpx_2.0).
+
 A simple command line program to transform log files obtained with the *Kawasaki Rideology App* into `.gpx` files.
 
 ![](images/logo.jpg)
 
-## Refrences
+## References
 
-* [Source code in Github](https://github.com/jbokser/rideology2gpx)
+* [Source code in GitHub](https://github.com/jbokser/rideology2gpx)
 * [Package from Python package index (PyPI)](https://pypi.org/project/rideology2gpx)
 
 
@@ -33,7 +35,7 @@ $ pip3 install rideology2gpx
 
 ### From source
 
-Download from [Github](https://github.com/jbokser/rideology2gpx)
+Download from [GitHub](https://github.com/jbokser/rideology2gpx)
 
 Standing inside the folder, run:
 
@@ -87,7 +89,7 @@ From gas station to next gas station
     
 Max engine speed:  3846 rpm
 Max wheel speed:   60 km/h
-Max water temp:    101 ℃
+Max water temp:    101 °C
 Avg idle speed:    1202 rpm
 Avg speed:         30 km/h
 Total time:        0:07:49

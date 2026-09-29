@@ -42,7 +42,8 @@ def main(
     except IsADirectoryError as e:
         bye(f"{repr(e.filename)} is a directory, not a file.", 1)
     except UnicodeDecodeError as e:
-        bye(f"{repr(filename)} is not a CSV file.", 1)
+        bye(f"{repr(filename)} is not a CSV file, or have encoding errors.",
+            1)
 
     if not datafile:
         bye(f"no data in file {repr(filename)}.", 2)
@@ -63,9 +64,10 @@ def main(
         datafile.title = f"{datafile.title}, {subtitle}"
 
     basename = datafile.filename.stem
+    basename = '_'.join(basename.split()).strip().lower()
 
     if out_filename_suffix:
-        basename = Path(f"{basename}_{out_filename_suffix}").stem
+        basename = Path(f"{basename}_({out_filename_suffix})").stem
 
     datafile.dump(
         basename=basename,
