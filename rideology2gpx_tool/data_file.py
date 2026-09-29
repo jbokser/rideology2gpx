@@ -231,8 +231,11 @@ class DataFile():
     @property
     def title(self):
         if self._title is None:
-            self._title = list(filter(lambda s: s.startswith('Title,,'),
-                                      str(self).split('\n')))[0][7:]           
+            title_line = next((line for line in str(self).split('\n')
+                               if line.startswith('Title,')), None)
+            self._title = (title_line.split(',', 2)[-1]
+                           if title_line.startswith('Title,,')
+                           else title_line[len('Title,'):]) if title_line else self.filename.stem
             self._title = ''.join(c for c in self._title if ord(c) < 128).strip()
         return self._title
         

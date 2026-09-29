@@ -48,7 +48,7 @@ def dinamic_help_decorator(**wildcards) -> Callable:
         type=TypeIntRange(0, 10), default=0,
         help='Cut the last X kilometres.', metavar="X")
 @option('-a', '--acceleration', 'acceleration',
-        type=(str, str), metavar="MIN_SPEED MAX_SPEED",
+        type=str, nargs=2, metavar="MIN_SPEED MAX_SPEED",
         help="Filters waypoints to only what is included between the speeds.")
 @dinamic_help_decorator(**app_info)
 def cli(csv_file, output_dir, start_time,
@@ -84,7 +84,7 @@ def cli(csv_file, output_dir, start_time,
     min_speed = None
     max_speed = None
     
-    if acceleration is not None:
+    if acceleration:
 
         min_speed, max_speed = [
             str(x).lower().strip() for x in list(acceleration)]
