@@ -1,5 +1,7 @@
 # **$ rideology2gpx**
 
+> **Notice:** This repository will be **ARCHIVED**. The replacement for this application is available at [rideology2gpx 2.0](https://github.com/jbokser/rideology2gpx_2.0).
+
 A simple command line program to transform log files obtained with the *Kawasaki Rideology App* into `.gpx` files.
 
 ![](images/logo.jpg)
